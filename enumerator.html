@@ -1,0 +1,2225 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labour Market Survey – Enumerator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f5f5f5;
+            color: #2c3e50;
+            line-height: 1.6;
+            padding-bottom: 80px;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 0.75rem 1rem;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        header h1 {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 0.1rem;
+        }
+
+        header p {
+            opacity: 0.7;
+            font-size: 0.78rem;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 0.75rem;
+        }
+
+        .intro-card {
+            background: white;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .intro-card h2 {
+            font-size: 0.95rem;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+        }
+
+        .intro-card p {
+            color: #495057;
+            white-space: pre-wrap;
+            line-height: 1.5;
+            font-size: 0.88rem;
+        }
+
+        .profile-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-left: 3px solid #667eea;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .profile-card h2 {
+            font-size: 0.88rem;
+            color: #495057;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-group {
+            margin-bottom: 0.75rem;
+        }
+
+        .profile-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .profile-label {
+            font-weight: 500;
+            color: #495057;
+            margin-bottom: 0.3rem;
+            display: block;
+            font-size: 0.85rem;
+        }
+
+        .section-card {
+            background: white;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid #e9ecef;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.3rem;
+            padding-bottom: 0.4rem;
+            border-bottom: 2px solid #667eea;
+        }
+
+        .section-instructions {
+            color: #6c757d;
+            font-size: 0.82rem;
+            margin-bottom: 1rem;
+            font-style: italic;
+        }
+
+        .question-group {
+            margin-bottom: 1.25rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .question-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
+
+        .question-label {
+            font-weight: 500;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+            font-size: 0.92rem;
+            display: block;
+        }
+
+        .required {
+            color: #dc3545;
+            margin-left: 0.25rem;
+        }
+
+        .validation-error {
+            color: #dc3545;
+            font-size: 0.85rem;
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .validation-error.show {
+            display: block;
+        }
+
+        textarea, select, input[type="text"] {
+            width: 100%;
+            padding: 0.5rem 0.65rem;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+            font-size: 0.92rem;
+            font-family: inherit;
+            transition: border-color 0.15s;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        textarea:focus, select:focus, input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+        }
+
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.65rem;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .radio-option:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .radio-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.6rem;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .radio-option label {
+            font-size: 0.92rem;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .radio-option input[type="radio"]:checked + label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .scale-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.4rem;
+        }
+
+        .scale-option {
+            display: flex;
+            align-items: center;
+            padding: 0.5rem 0.65rem;
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: border-color 0.15s, background 0.15s;
+        }
+
+        .scale-option:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+        }
+
+        .scale-option input[type="radio"] {
+            width: 16px;
+            height: 16px;
+            margin-right: 0.6rem;
+            cursor: pointer;
+            accent-color: #667eea;
+        }
+
+        .scale-option input[type="radio"]:checked ~ .scale-number {
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .scale-option input[type="radio"]:checked ~ .scale-label {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .scale-number {
+            font-weight: 600;
+            color: #6c757d;
+            min-width: 24px;
+            font-size: 0.85rem;
+        }
+
+        .scale-label {
+            flex: 1;
+            font-size: 0.92rem;
+            cursor: pointer;
+        }
+
+        .submit-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            padding: 0.6rem 1rem;
+            box-shadow: 0 -1px 6px rgba(0,0,0,0.1);
+            z-index: 99;
+        }
+
+        .submit-btn {
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            display: block;
+            padding: 0.65rem 1rem;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+        }
+
+        .submit-btn:hover {
+            background: #1a252f;
+        }
+
+        .submit-btn:active {
+            background: #16202a;
+        }
+
+        .error-screen {
+            text-align: center;
+            padding: 3rem 1rem;
+            max-width: 600px;
+            margin: 2rem auto;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .error-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .error-screen h2 {
+            color: #dc3545;
+            margin-bottom: 1rem;
+        }
+
+        .error-screen p {
+            color: #6c757d;
+            line-height: 1.6;
+        }
+
+        .success-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .success-modal.show {
+            display: flex;
+        }
+
+        .success-content {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+            max-width: 340px;
+            margin: 1rem;
+            border-top: 3px solid #28a745;
+        }
+
+        .success-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .success-content h2 {
+            color: #28a745;
+            margin-bottom: 0.35rem;
+            font-size: 1rem;
+        }
+
+        .success-content p {
+            color: #6c757d;
+            margin-bottom: 1rem;
+            font-size: 0.85rem;
+        }
+
+        .success-btn {
+            padding: 0.55rem 1.75rem;
+            background: #2c3e50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .success-btn:hover {
+            background: #1a252f;
+        }
+
+        @media (min-width: 768px) {
+            .scale-group { gap: 0.5rem; }
+        }
+
+        .respondent-manager {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-left: 3px solid #ffc107;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .respondent-manager h2 {
+            font-size: 0.78rem;
+            color: #6c757d;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .respondent-bar {
+            display: flex;
+            gap: 0.4rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .respondent-bar select {
+            flex: 1;
+            min-width: 160px;
+            padding: 0.35rem 0.55rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-family: inherit;
+            background: white;
+            height: 30px;
+        }
+
+        .respondent-bar select:focus {
+            outline: none;
+            border-color: #ffc107;
+        }
+
+        .respondent-bar .rm-btn {
+            padding: 0.25rem 0.65rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            white-space: nowrap;
+            height: 30px;
+        }
+
+        .rm-btn-new    { background: #28a745; color: white; }
+        .rm-btn-new:hover    { background: #218838; }
+        .rm-btn-delete { background: #dc3545; color: white; }
+        .rm-btn-delete:hover { background: #c82333; }
+
+        .respondent-id-badge {
+            font-size: 0.72rem;
+            color: #856404;
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .respondent-meta-row {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            margin-top: 0.4rem;
+            flex-wrap: wrap;
+        }
+
+        .respondent-stats {
+            font-size: 0.72rem;
+            color: #495057;
+            background: #e9ecef;
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+            font-weight: 500;
+        }
+
+        /* ── Enumerator ID bar ── */
+        .enumerator-bar {
+            background: #f0f4ff;
+            border: 1px solid #c5d0f7;
+            border-radius: 6px;
+            padding: 0.55rem 0.9rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            flex-wrap: wrap;
+        }
+
+        .enumerator-bar label {
+            font-weight: 600;
+            color: #3d4db7;
+            font-size: 0.82rem;
+            white-space: nowrap;
+        }
+
+        .enumerator-bar input[type="text"] {
+            flex: 1;
+            min-width: 140px;
+            padding: 0.3rem 0.55rem;
+            border: 1px solid #b3c0f5;
+            border-radius: 4px;
+            font-size: 0.88rem;
+            font-family: inherit;
+            background: white;
+            height: 30px;
+        }
+
+        .enumerator-bar input[type="text"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .enumerator-bar .eb-save-btn {
+            padding: 0.25rem 0.7rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            height: 30px;
+            white-space: nowrap;
+        }
+
+        .enumerator-bar .eb-save-btn:hover { background: #5568d3; }
+
+        .enumerator-bar .eb-val {
+            font-weight: 600;
+            color: #3d4db7;
+            font-size: 0.85rem;
+            flex: 1;
+        }
+
+        /* ── Data Management bar ── */
+        .data-mgmt-card {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.9rem 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .data-mgmt-card h2 {
+            font-size: 0.88rem;
+            color: #495057;
+            margin-bottom: 0.6rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .dm-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .dm-action-btn {
+            padding: 0.35rem 0.8rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            background: white;
+            font-size: 0.82rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            color: #343a40;
+            transition: background 0.15s, border-color 0.15s;
+            white-space: nowrap;
+        }
+
+        .dm-action-btn:hover {
+            background: #f0f4ff;
+            border-color: #667eea;
+            color: #667eea;
+        }
+
+        .dm-action-btn.export-primary {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .dm-action-btn.export-primary:hover {
+            background: #5568d3;
+            border-color: #5568d3;
+            color: white;
+        }
+
+        .dm-action-btn.import-btn {
+            border-color: #28a745;
+            color: #28a745;
+        }
+
+        .dm-action-btn.import-btn:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .dm-action-btn.upload-btn {
+            border-color: #6f42c1;
+            color: #6f42c1;
+        }
+
+        .dm-action-btn.upload-btn:hover {
+            background: #6f42c1;
+            color: white;
+        }
+
+        .dm-action-btn.upload-btn:disabled {
+            opacity: 0.55;
+            cursor: default;
+        }
+
+        .dm-status {
+            font-size: 0.8rem;
+            color: #495057;
+            margin-top: 0.5rem;
+            min-height: 1rem;
+        }
+
+        .dm-status.success { color: #28a745; font-weight: 500; }
+        .dm-status.error   { color: #dc3545; font-weight: 500; }
+
+        /* ── Reset separator & button ── */
+        .dm-reset-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .dm-reset-row .dm-reset-label {
+            font-size: 0.75rem;
+            color: #adb5bd;
+            flex: 1;
+            white-space: nowrap;
+        }
+
+        .dm-reset-btn {
+            padding: 0.3rem 0.8rem;
+            background: white;
+            color: #dc3545;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background 0.15s, color 0.15s;
+            white-space: nowrap;
+        }
+
+        .dm-reset-btn:hover {
+            background: #dc3545;
+            color: white;
+        }
+
+        /* ── Reset confirmation dialog ── */
+        .reset-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 4000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .reset-overlay.show { display: flex; }
+
+        .reset-dialog {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            max-width: 360px;
+            width: 92%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+            border-top: 4px solid #dc3545;
+        }
+
+        .reset-dialog h3 {
+            font-size: 0.95rem;
+            color: #dc3545;
+            margin-bottom: 0.65rem;
+            font-weight: 700;
+        }
+
+        .reset-dialog p {
+            font-size: 0.83rem;
+            color: #495057;
+            line-height: 1.55;
+            margin-bottom: 1rem;
+        }
+
+        .reset-dialog p strong {
+            color: #2c3e50;
+        }
+
+        .reset-dialog-actions {
+            display: flex;
+            gap: 0.5rem;
+            justify-content: flex-end;
+        }
+
+        .reset-dialog-actions .rd-cancel {
+            padding: 0.4rem 1rem;
+            background: white;
+            color: #495057;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .reset-dialog-actions .rd-cancel:hover { background: #f8f9fa; }
+
+        .reset-dialog-actions .rd-confirm {
+            padding: 0.4rem 1rem;
+            background: #dc3545;
+            color: white;
+            border: 1px solid #dc3545;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .reset-dialog-actions .rd-confirm:hover { background: #c82333; border-color: #c82333; }
+        .reset-dialog-actions .rd-confirm:disabled { opacity: 0.55; cursor: default; }
+
+        /* ── Enumerator gate modal ── */
+        .gate-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .gate-overlay.show { display: flex; }
+
+        .gate-modal {
+            background: white;
+            border-radius: 8px;
+            padding: 1.75rem;
+            max-width: 380px;
+            width: 92%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+        }
+
+        .gate-modal h2 {
+            font-size: 1.05rem;
+            color: #2c3e50;
+            margin-bottom: 0.4rem;
+        }
+
+        .gate-modal p {
+            font-size: 0.84rem;
+            color: #6c757d;
+            margin-bottom: 1rem;
+        }
+
+        .gate-modal input {
+            width: 100%;
+            padding: 0.6rem 0.75rem;
+            border: 1.5px solid #dee2e6;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            margin-bottom: 0.75rem;
+        }
+
+        .gate-modal input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .gate-modal button {
+            width: 100%;
+            padding: 0.65rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .gate-modal button:hover { background: #5568d3; }
+
+        .gate-error {
+            font-size: 0.8rem;
+            color: #dc3545;
+            margin: -0.4rem 0 0.5rem;
+            display: none;
+        }
+
+        /* ── Loading overlay ── */
+        .loading-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(255,255,255,0.75);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .loading-overlay.show { display: flex; }
+
+        .loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid #e9ecef;
+            border-top-color: #667eea;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        .loading-overlay p {
+            font-size: 0.88rem;
+            color: #495057;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <div class="success-modal" id="success-modal">
+        <div class="success-content">
+            <div class="success-icon">✅</div>
+            <h2>Response Submitted!</h2>
+            <p>Thank you for completing the survey. Your response has been saved successfully.</p>
+            <button class="success-btn" onclick="closeSuccessModal()">Continue</button>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p id="loading-msg">Processing...</p>
+    </div>
+
+    <div class="gate-overlay" id="gate-overlay">
+        <div class="gate-modal">
+            <h2>Enumerator Identification</h2>
+            <p>Enter your name or enumerator code. This will be recorded with all responses you collect.</p>
+            <input type="text" id="gate-input" placeholder="e.g. John Doe or ENUM-001" autocomplete="off">
+            <div class="gate-error" id="gate-error">Enumerator name is required to proceed.</div>
+            <button onclick="confirmEnumeratorId()">Continue to Survey</button>
+        </div>
+    </div>
+
+    <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(event)">
+
+    <div class="reset-overlay" id="reset-overlay">
+        <div class="reset-dialog">
+            <h3>⚠ Warning — Reset Local Data</h3>
+            <p>This will <strong>permanently remove all locally stored data</strong> from this device.<br><br>
+               A backup file will be <strong>automatically downloaded</strong> before deletion.<br>
+               Do you want to continue?</p>
+            <div class="reset-dialog-actions">
+                <button class="rd-cancel" onclick="closeResetDialog()">Cancel</button>
+                <button class="rd-confirm" id="rd-confirm-btn" onclick="confirmReset()">Confirm Reset</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+    <script>
+        /* ════════════════════════════════════════════════════
+           SCALE TEMPLATES  (unchanged)
+        ════════════════════════════════════════════════════ */
+        const SCALE_TEMPLATES = {
+            agreement5: { points: 5, labels: ['Strongly Agree','Agree','Neutral','Disagree','Strongly Disagree'] },
+            frequency5:  { points: 5, labels: ['Always','Often','Sometimes','Rarely','Never'] },
+            importance5: { points: 5, labels: ['Very Important','Important','Moderately Important','Slightly Important','Not Important'] },
+            agreement4:  { points: 4, labels: ['Strongly Agree','Agree','Disagree','Strongly Disagree'] },
+            simple3:     { points: 3, labels: ['Yes','To some extent','No'] }
+        };
+
+        function getScaleDefinition(question) {
+            if (!question.scale) return null;
+            if (typeof question.scale === 'object' && question.scale.labels) return question.scale;
+            const points = parseInt(question.scale);
+            if (points === 5) return { ...SCALE_TEMPLATES.agreement5, type: 'agreement5' };
+            if (points === 4) return { ...SCALE_TEMPLATES.agreement4, type: 'agreement4' };
+            if (points === 3) return { ...SCALE_TEMPLATES.simple3,    type: 'simple3'    };
+            return { points, type: 'custom', labels: Array.from({ length: points }, (_, i) => `Option ${i+1}`) };
+        }
+
+        /* ════════════════════════════════════════════════════
+           URL DECODE  (unchanged)
+        ════════════════════════════════════════════════════ */
+        function decodeUTF8Base64(str) {
+            try {
+                return decodeURIComponent(atob(str).split('').map(c =>
+                    '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
+                ).join(''));
+            } catch(e) {
+                return decodeURIComponent(atob(str));
+            }
+        }
+
+        /* ════════════════════════════════════════════════════
+           STATE
+        ════════════════════════════════════════════════════ */
+        let surveyConfig  = null;
+        let formData      = {};
+        let profileData   = {};
+        let STORE_KEY     = 'lms_respondents';
+        let _enumeratorId = '';
+
+        /* ════════════════════════════════════════════════════
+           INDEXEDDB LAYER
+        ════════════════════════════════════════════════════ */
+        const IDB_NAME    = 'LMS_Offline_DB';
+        const IDB_VERSION = 1;
+        let _db           = null;
+        let _memStore     = { activeRespondentId: null, respondents: {} };
+        let _idbDirty     = false;
+        let _idbFlushTimer = null;
+
+        function openDB() {
+            return new Promise((resolve, reject) => {
+                const req = indexedDB.open(IDB_NAME, IDB_VERSION);
+                req.onupgradeneeded = (e) => {
+                    const db = e.target.result;
+                    if (!db.objectStoreNames.contains('metadata')) {
+                        db.createObjectStore('metadata');
+                    }
+                    if (!db.objectStoreNames.contains('surveys')) {
+                        db.createObjectStore('surveys');
+                    }
+                };
+                req.onsuccess  = (e) => resolve(e.target.result);
+                req.onerror    = (e) => reject(e.target.error);
+                req.onblocked  = ()  => reject(new Error('IDB blocked'));
+            });
+        }
+
+        function idbGet(storeName, key) {
+            return new Promise((resolve, reject) => {
+                if (!_db) { resolve(undefined); return; }
+                const tx  = _db.transaction(storeName, 'readonly');
+                const req = tx.objectStore(storeName).get(key);
+                req.onsuccess = () => resolve(req.result);
+                req.onerror   = () => reject(req.error);
+            });
+        }
+
+        function idbPut(storeName, key, value) {
+            return new Promise((resolve, reject) => {
+                if (!_db) { resolve(); return; }
+                const tx  = _db.transaction(storeName, 'readwrite');
+                const req = tx.objectStore(storeName).put(value, key);
+                req.onsuccess = () => resolve();
+                req.onerror   = () => reject(req.error);
+            });
+        }
+
+        function idbDelete(storeName, key) {
+            return new Promise((resolve, reject) => {
+                if (!_db) { resolve(); return; }
+                const tx  = _db.transaction(storeName, 'readwrite');
+                const req = tx.objectStore(storeName).delete(key);
+                req.onsuccess = () => resolve();
+                req.onerror   = () => reject(req.error);
+            });
+        }
+
+        function scheduleIDBFlush() {
+            _idbDirty = true;
+            clearTimeout(_idbFlushTimer);
+            _idbFlushTimer = setTimeout(flushToDB, 400);
+        }
+
+        async function flushToDB() {
+            if (!_idbDirty) return;
+            _idbDirty = false;
+            try {
+                await idbPut('surveys', STORE_KEY, _memStore);
+            } catch(e) { /* silent */ }
+            try {
+                localStorage.setItem(STORE_KEY, JSON.stringify(_memStore));
+            } catch(e) { /* quota exceeded - silent */ }
+        }
+
+        async function loadStoreFromDB() {
+            let stored = null;
+            try { stored = await idbGet('surveys', STORE_KEY); } catch(e) {}
+            if (!stored) {
+                try { stored = JSON.parse(localStorage.getItem(STORE_KEY)); } catch(e) {}
+            }
+            _memStore = stored || { activeRespondentId: null, respondents: {} };
+        }
+
+        /* ════════════════════════════════════════════════════
+           ENUMERATOR ID
+        ════════════════════════════════════════════════════ */
+        async function loadEnumeratorId() {
+            let eid = null;
+            try { eid = await idbGet('metadata', 'enumeratorId'); } catch(e) {}
+            if (!eid) {
+                try { eid = localStorage.getItem('lms_enumerator_id'); } catch(e) {}
+            }
+            _enumeratorId = eid || '';
+        }
+
+        async function saveEnumeratorId(eid) {
+            _enumeratorId = eid;
+            try { await idbPut('metadata', 'enumeratorId', eid); } catch(e) {}
+            try { localStorage.setItem('lms_enumerator_id', eid); } catch(e) {}
+        }
+
+        function showEnumeratorGate() {
+            const overlay = document.getElementById('gate-overlay');
+            const input   = document.getElementById('gate-input');
+            input.value   = _enumeratorId || '';
+            overlay.classList.add('show');
+            setTimeout(() => input.focus(), 100);
+        }
+
+        async function confirmEnumeratorId() {
+            const input = document.getElementById('gate-input');
+            const err   = document.getElementById('gate-error');
+            const val   = input.value.trim();
+            if (!val) {
+                err.style.display = 'block';
+                input.focus();
+                return;
+            }
+            err.style.display = 'none';
+            await saveEnumeratorId(val);
+            document.getElementById('gate-overlay').classList.remove('show');
+            const nameEl = document.getElementById('eb-name-display');
+            if (nameEl) nameEl.textContent = val;
+        }
+
+        /* ════════════════════════════════════════════════════
+           STORAGE INTERFACE  (sync surface — backed by _memStore)
+        ════════════════════════════════════════════════════ */
+        function loadStore() {
+            return _memStore;
+        }
+
+        function saveStore(store) {
+            _memStore = store;
+            scheduleIDBFlush();
+        }
+
+        /* ════════════════════════════════════════════════════
+           RESPONDENT LOGIC  (unchanged signatures)
+        ════════════════════════════════════════════════════ */
+        function generateId(store) {
+            const ids = Object.keys(store.respondents);
+            let max = 0;
+            ids.forEach(id => {
+                const n = parseInt(id.replace('LMS-', ''), 10);
+                if (!isNaN(n) && n > max) max = n;
+            });
+            return 'LMS-' + String(max + 1).padStart(5, '0');
+        }
+
+        function respondentDisplayName(id, respondent) {
+            const name = (respondent.meta && respondent.meta.name || '').trim();
+            return name ? id + ' – ' + name : id;
+        }
+
+        function migrateLegacyData(store) {
+            const surveyId  = surveyConfig ? (surveyConfig.surveyId || 'default') : 'default';
+            const legacyKey = 'lms_responses_' + surveyId;
+            const oldKey    = 'lms_responses';
+
+            let legacyArr = null;
+            try { legacyArr = JSON.parse(localStorage.getItem(legacyKey)); } catch(e) {}
+            if (!legacyArr) {
+                try { legacyArr = JSON.parse(localStorage.getItem(oldKey)); } catch(e) {}
+            }
+
+            if (!legacyArr || !Array.isArray(legacyArr) || legacyArr.length === 0) return store;
+            if (Object.keys(store.respondents).length > 0) return store;
+
+            legacyArr.forEach((resp, idx) => {
+                const id      = 'LMS-' + String(idx + 1).padStart(5, '0');
+                const raw     = resp.answers || {};
+                const answers = {};
+                if (surveyConfig && surveyConfig.sections) {
+                    surveyConfig.sections.forEach((section, sIdx) => {
+                        section.questions.forEach((question, qIdx) => {
+                            if (raw[question.text] !== undefined) {
+                                if (!answers[sIdx]) answers[sIdx] = {};
+                                answers[sIdx][qIdx] = { question: question.text, answer: raw[question.text] };
+                            }
+                        });
+                    });
+                }
+                store.respondents[id] = {
+                    meta: resp.meta || {},
+                    answers,
+                    startTime: resp.timestamp || new Date().toISOString(),
+                    endTime:   resp.timestamp || null,
+                    completed: true
+                };
+            });
+
+            if (legacyArr.length > 0) {
+                store.activeRespondentId = 'LMS-' + String(1).padStart(5, '0');
+            }
+            return store;
+        }
+
+        function getActiveRespondent(store) {
+            return store.respondents[store.activeRespondentId] || null;
+        }
+
+        function ensureActiveRespondent(store) {
+            if (!store.activeRespondentId || !store.respondents[store.activeRespondentId]) {
+                const keys = Object.keys(store.respondents);
+                if (keys.length > 0) {
+                    store.activeRespondentId = keys[0];
+                } else {
+                    const id = generateId(store);
+                    store.respondents[id] = emptyRespondent();
+                    store.activeRespondentId = id;
+                }
+            }
+            return store;
+        }
+
+        function emptyRespondent() {
+            return { meta: {}, answers: {}, startTime: new Date().toISOString(), endTime: null, completed: false };
+        }
+
+        /* ════════════════════════════════════════════════════
+           AUTOSAVE
+        ════════════════════════════════════════════════════ */
+        function autosave() {
+            const store = loadStore();
+            if (!store.activeRespondentId) return;
+            const r = store.respondents[store.activeRespondentId];
+            if (!r) return;
+            r.meta    = { ...profileData };
+            r.answers = JSON.parse(JSON.stringify(formData));
+            saveStore(store);
+            updateDropdownLabel(store);
+        }
+
+        function updateDropdownLabel(store) {
+            const sel = document.getElementById('respondent-select');
+            if (!sel) return;
+            const id   = store.activeRespondentId;
+            const resp = store.respondents[id];
+            if (!resp) return;
+            for (let i = 0; i < sel.options.length; i++) {
+                if (sel.options[i].value === id) {
+                    sel.options[i].text = respondentDisplayName(id, resp);
+                    break;
+                }
+            }
+        }
+
+        /* ════════════════════════════════════════════════════
+           RESPONDENT MANAGER UI  (unchanged except stats)
+        ════════════════════════════════════════════════════ */
+        function buildRespondentManager(store) {
+            const id   = store.activeRespondentId;
+            const opts = Object.entries(store.respondents).map(([rid, r]) =>
+                `<option value="${rid}" ${rid === id ? 'selected' : ''}>${respondentDisplayName(rid, r)}${r.completed ? ' ✓' : ''}</option>`
+            ).join('');
+
+            return `
+                <div class="respondent-manager">
+                    <h2>👥 Respondent Management</h2>
+                    <div class="respondent-bar">
+                        <select id="respondent-select" onchange="onSelectRespondent(this.value)">
+                            ${opts}
+                        </select>
+                        <button class="rm-btn rm-btn-new" onclick="onNewRespondent()">➕ New Respondent</button>
+                        <button class="rm-btn rm-btn-delete" onclick="onDeleteRespondent()">🗑 Delete</button>
+                    </div>
+                    <div class="respondent-meta-row">
+                        <div class="respondent-id-badge" id="respondent-badge">Active: ${id || '—'}</div>
+                        <div class="respondent-stats" id="respondent-stats"></div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function onSelectRespondent(id) {
+            autosave();
+            const store = loadStore();
+            if (!store.respondents[id]) return;
+            store.activeRespondentId = id;
+            saveStore(store);
+            loadRespondentIntoForm(store.respondents[id]);
+            updateBadge(id);
+        }
+
+        function onNewRespondent() {
+            autosave();
+            const store = loadStore();
+            const id    = generateId(store);
+            store.respondents[id] = emptyRespondent();
+            store.activeRespondentId = id;
+            saveStore(store);
+            formData    = {};
+            profileData = {};
+            clearForm();
+            rebuildDropdown(store);
+            updateBadge(id);
+            updateStats(store);
+        }
+
+        function onDeleteRespondent() {
+            const store = loadStore();
+            const id    = store.activeRespondentId;
+            if (!id) return;
+            const count = Object.keys(store.respondents).length;
+            if (count <= 1) { alert('Cannot delete the only respondent. Create a new one first.'); return; }
+            if (!confirm(`Delete respondent ${id}? This cannot be undone.`)) return;
+            delete store.respondents[id];
+            const keys = Object.keys(store.respondents);
+            store.activeRespondentId = keys[keys.length - 1];
+            saveStore(store);
+            formData    = {};
+            profileData = {};
+            const next = store.respondents[store.activeRespondentId];
+            if (next) loadRespondentIntoForm(next);
+            rebuildDropdown(store);
+            updateBadge(store.activeRespondentId);
+            updateStats(store);
+        }
+
+        function rebuildDropdown(store) {
+            const sel = document.getElementById('respondent-select');
+            if (!sel) return;
+            const id   = store.activeRespondentId;
+            sel.innerHTML = Object.entries(store.respondents).map(([rid, r]) =>
+                `<option value="${rid}" ${rid === id ? 'selected' : ''}>${respondentDisplayName(rid, r)}${r.completed ? ' ✓' : ''}</option>`
+            ).join('');
+        }
+
+        function updateBadge(id) {
+            const b = document.getElementById('respondent-badge');
+            if (b) b.textContent = 'Active: ' + (id || '—');
+        }
+
+        function updateStats(store) {
+            const el = document.getElementById('respondent-stats');
+            if (!el) return;
+            const total     = Object.keys(store.respondents).length;
+            const completed = Object.values(store.respondents).filter(r => r.completed).length;
+            el.textContent  = `Total: ${total} | Completed: ${completed}`;
+        }
+
+        /* ════════════════════════════════════════════════════
+           FORM POPULATION  (unchanged)
+        ════════════════════════════════════════════════════ */
+        function loadRespondentIntoForm(respondent) {
+            profileData = { ...(respondent.meta || {}) };
+            formData    = JSON.parse(JSON.stringify(respondent.answers || {}));
+
+            const fAge  = document.getElementById('profile-age');
+            const fGen  = document.getElementById('profile-gender');
+            const fEdu  = document.getElementById('profile-education');
+            const fName = document.getElementById('profile-name');
+
+            if (fAge)  fAge.value  = profileData.age       || '';
+            if (fGen)  fGen.value  = profileData.gender    || '';
+            if (fEdu)  fEdu.value  = profileData.education || '';
+            if (fName) fName.value = profileData.name      || '';
+
+            Object.entries(formData).forEach(([sIdx, questions]) => {
+                Object.entries(questions).forEach(([qIdx, data]) => {
+                    const qId     = `q-${sIdx}-${qIdx}`;
+                    const section = surveyConfig.sections[sIdx];
+                    if (!section) return;
+                    const question = section.questions[qIdx];
+                    if (!question) return;
+                    if (question.type === 'text') {
+                        const el = document.getElementById(qId);
+                        if (el) el.value = data.answer || '';
+                    } else {
+                        document.querySelectorAll(`input[name="${qId}"]`).forEach(r => {
+                            r.checked = (r.value === data.answer);
+                        });
+                    }
+                });
+            });
+        }
+
+        function clearForm() {
+            const fAge  = document.getElementById('profile-age');
+            const fGen  = document.getElementById('profile-gender');
+            const fEdu  = document.getElementById('profile-education');
+            const fName = document.getElementById('profile-name');
+            if (fAge)  fAge.value  = '';
+            if (fGen)  fGen.value  = '';
+            if (fEdu)  fEdu.value  = '';
+            if (fName) fName.value = '';
+            document.querySelectorAll('textarea').forEach(t => t.value = '');
+            document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
+            document.querySelectorAll('.validation-error').forEach(e => e.classList.remove('show'));
+        }
+
+        /* ════════════════════════════════════════════════════
+           FLAT ANSWERS HELPER
+        ════════════════════════════════════════════════════ */
+        function flattenAnswers(answers) {
+            const flat = {};
+            Object.keys(answers).forEach(sIdx => {
+                Object.keys(answers[sIdx]).forEach(qIdx => {
+                    const d = answers[sIdx][qIdx];
+                    flat[d.question] = d.answer;
+                });
+            });
+            return flat;
+        }
+
+        function respondentToExportRow(id, respondent) {
+            const meta    = respondent.meta    || {};
+            const answers = flattenAnswers(respondent.answers || {});
+            return { respondentId: id, ...meta, ...answers,
+                     startTime: respondent.startTime || '',
+                     endTime:   respondent.endTime   || '',
+                     completed: respondent.completed ? 'Yes' : 'No' };
+        }
+
+        /* ════════════════════════════════════════════════════
+           HELPERS: FILE NAMING
+        ════════════════════════════════════════════════════ */
+        function buildExportFilename(ext) {
+            const surveyName = surveyConfig
+                ? (surveyConfig.surveyTitle || surveyConfig.projectTitle || 'survey').toLowerCase()
+                : 'survey';
+            const enumName   = (_enumeratorId || 'unknown').toLowerCase();
+            const now        = new Date();
+            const ymd = now.getFullYear().toString()
+                + String(now.getMonth()+1).padStart(2,'0')
+                + String(now.getDate()).padStart(2,'0');
+            const hm  = String(now.getHours()).padStart(2,'0')
+                + String(now.getMinutes()).padStart(2,'0');
+            const slug = (name) => name.replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 40);
+            return `${slug(surveyName)}_${slug(enumName)}_${ymd}_${hm}.${ext}`;
+        }
+
+        /* ════════════════════════════════════════════════════
+           EXPORT: JSON  (professional field format)
+        ════════════════════════════════════════════════════ */
+        async function exportJSON() {
+            showLoading('Preparing export…');
+            try {
+                await flushToDB();
+                const store = loadStore();
+
+                const responses = Object.entries(store.respondents).map(([id, r]) => ({
+                    id,
+                    respondent: {
+                        name:      (r.meta && r.meta.name)      || '',
+                        age:       (r.meta && r.meta.age)       || '',
+                        gender:    (r.meta && r.meta.gender)    || '',
+                        education: (r.meta && r.meta.education) || ''
+                    },
+                    answers:    flattenAnswers(r.answers || {}),
+                    start_time: r.startTime || '',
+                    end_time:   r.endTime   || '',
+                    completed:  r.completed || false
+                }));
+
+                const payload = {
+                    version:          '1.0',
+                    export_timestamp: new Date().toISOString(),
+                    survey_info: {
+                        id:           surveyConfig ? (surveyConfig.surveyId    || '') : '',
+                        name:         surveyConfig ? (surveyConfig.surveyTitle || surveyConfig.projectTitle || '') : '',
+                        organization: surveyConfig ? (surveyConfig.organization || '') : '',
+                        location:     surveyConfig ? (surveyConfig.location     || '') : ''
+                    },
+                    enumerator_info: {
+                        name: _enumeratorId || ''
+                    },
+                    responses
+                };
+
+                downloadText(JSON.stringify(payload, null, 2), buildExportFilename('json'), 'application/json');
+                setDMStatus(`Exported ${responses.length} response(s).`, 'success');
+            } catch(e) {
+                setDMStatus('Export failed: ' + e.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        /* ════════════════════════════════════════════════════
+           EXPORT: EXCEL / CSV
+        ════════════════════════════════════════════════════ */
+        async function exportExcel() {
+            showLoading('Preparing spreadsheet…');
+            try {
+                await flushToDB();
+                const store = loadStore();
+                const rows  = Object.entries(store.respondents).map(([id, r]) =>
+                    respondentToExportRow(id, r)
+                );
+
+                if (rows.length === 0) { setDMStatus('No responses to export.', 'error'); hideLoading(); return; }
+
+                if (typeof XLSX !== 'undefined') {
+                    const ws  = XLSX.utils.json_to_sheet(rows);
+                    const wb  = XLSX.utils.book_new();
+                    XLSX.utils.book_append_sheet(wb, ws, 'Responses');
+                    XLSX.writeFile(wb, buildExportFilename('xlsx'));
+                    setDMStatus(`Exported ${rows.length} response(s) to Excel.`, 'success');
+                } else {
+                    const csv = rowsToCSV(rows);
+                    downloadText(csv, buildExportFilename('csv'), 'text/csv');
+                    setDMStatus('Exported as CSV (Excel library unavailable offline).', 'success');
+                }
+            } catch(e) {
+                setDMStatus('Export failed: ' + e.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        function rowsToCSV(rows) {
+            if (!rows || rows.length === 0) return '';
+            const headers = Object.keys(rows[0]);
+            const escape  = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+            const lines   = [headers.map(escape).join(',')];
+            rows.forEach(r => lines.push(headers.map(h => escape(r[h])).join(',')));
+            return lines.join('\r\n');
+        }
+
+        /* ════════════════════════════════════════════════════
+           IMPORT  (accepts v1.0 field format and legacy format)
+        ════════════════════════════════════════════════════ */
+        function triggerImport() {
+            document.getElementById('import-file-input').value = '';
+            document.getElementById('import-file-input').click();
+        }
+
+        async function handleImportFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            showLoading('Importing data…');
+            try {
+                const text = await file.text();
+                const obj  = JSON.parse(text);
+
+                // Validate: must have responses or respondents
+                if (!obj.responses && !obj.respondents) {
+                    setDMStatus('Invalid file: no responses found.', 'error');
+                    return;
+                }
+
+                await importData(obj);
+            } catch(e) {
+                setDMStatus('Import failed: ' + (e.message || 'Could not read file.'), 'error');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function importData(obj) {
+            // Cross-survey warning
+            const currentSurveyId = surveyConfig ? (surveyConfig.surveyId || 'default') : 'default';
+            const fileSurveyId    = (obj.survey_info && obj.survey_info.id) || obj.surveyId || '';
+            if (fileSurveyId && fileSurveyId !== currentSurveyId) {
+                const fileSurveyName = (obj.survey_info && obj.survey_info.name) || obj.surveyName || fileSurveyId;
+                if (!confirm(`This file belongs to survey "${fileSurveyName}".\nYou are currently on a different survey.\n\nImport anyway?`)) {
+                    setDMStatus('Import cancelled.', '');
+                    return;
+                }
+            }
+
+            const store = loadStore();
+            let added = 0, skipped = 0;
+
+            // Determine source array: v1.0 uses "responses", legacy uses "respondents"
+            const isV1        = obj.version === '1.0' && Array.isArray(obj.responses);
+            const sourceArray = isV1 ? obj.responses : null;
+            const sourceObj   = (!isV1 && obj.respondents) ? obj.respondents : null;
+
+            const existingMax = Object.keys(store.respondents).reduce((mx, id) => {
+                const n = parseInt(id.replace('LMS-', ''), 10);
+                return (!isNaN(n) && n > mx) ? n : mx;
+            }, 0);
+            let counter = existingMax;
+
+            if (isV1) {
+                // v1.0 format: responses[] with { id, respondent, answers, start_time, end_time, completed }
+                sourceArray.forEach(r => {
+                    const rid = r.id || '';
+                    if (!rid) { skipped++; return; }
+
+                    let targetId = rid;
+                    if (store.respondents[targetId]) {
+                        counter++;
+                        targetId = 'LMS-' + String(counter).padStart(5, '0');
+                    }
+
+                    // Reconstruct internal answer format from flat answers
+                    const internalAnswers = {};
+                    if (surveyConfig && surveyConfig.sections && r.answers) {
+                        surveyConfig.sections.forEach((section, sIdx) => {
+                            section.questions.forEach((q, qIdx) => {
+                                if (r.answers[q.text] !== undefined) {
+                                    if (!internalAnswers[sIdx]) internalAnswers[sIdx] = {};
+                                    internalAnswers[sIdx][qIdx] = { question: q.text, answer: r.answers[q.text] };
+                                }
+                            });
+                        });
+                    }
+
+                    store.respondents[targetId] = {
+                        meta:      r.respondent || {},
+                        answers:   internalAnswers,
+                        startTime: r.start_time || new Date().toISOString(),
+                        endTime:   r.end_time   || null,
+                        completed: r.completed  === true
+                    };
+                    added++;
+                });
+            } else if (sourceObj) {
+                // Legacy format: respondents{} or respondents[]
+                const isArray  = Array.isArray(sourceObj);
+                const entries  = isArray
+                    ? sourceObj.map(r => [r.respondentId || '', r])
+                    : Object.entries(sourceObj);
+
+                entries.forEach(([rid, r]) => {
+                    if (!rid) { skipped++; return; }
+                    if (store.respondents[rid]) { skipped++; return; }
+
+                    let targetId = rid;
+                    if (store.respondents[targetId]) {
+                        counter++;
+                        targetId = 'LMS-' + String(counter).padStart(5, '0');
+                    }
+
+                    if (isArray) {
+                        const { respondentId, startTime, endTime, completed, meta, answers, ...flat } = r;
+                        const internalAnswers = {};
+                        const flatAnswers     = answers ? flattenAnswers(answers) : flat;
+                        if (surveyConfig && surveyConfig.sections) {
+                            surveyConfig.sections.forEach((section, sIdx) => {
+                                section.questions.forEach((q, qIdx) => {
+                                    if (flatAnswers[q.text] !== undefined) {
+                                        if (!internalAnswers[sIdx]) internalAnswers[sIdx] = {};
+                                        internalAnswers[sIdx][qIdx] = { question: q.text, answer: flatAnswers[q.text] };
+                                    }
+                                });
+                            });
+                        }
+                        store.respondents[targetId] = {
+                            meta:      meta || {},
+                            answers:   internalAnswers,
+                            startTime: startTime || new Date().toISOString(),
+                            endTime:   endTime   || null,
+                            completed: completed === 'Yes' || completed === true
+                        };
+                    } else {
+                        store.respondents[targetId] = {
+                            meta:      r.meta      || {},
+                            answers:   r.answers   || {},
+                            startTime: r.startTime || new Date().toISOString(),
+                            endTime:   r.endTime   || null,
+                            completed: r.completed || false
+                        };
+                    }
+                    added++;
+                });
+            }
+
+            saveStore(store);
+            await flushToDB();
+            rebuildDropdown(store);
+            updateStats(store);
+
+            const msg = added > 0
+                ? `Imported ${added} response(s).${skipped > 0 ? ` ${skipped} duplicate(s) skipped.` : ''}`
+                : `No new responses imported. ${skipped} duplicate(s) skipped.`;
+            setDMStatus(msg, added > 0 ? 'success' : 'error');
+        }
+
+        /* ════════════════════════════════════════════════════
+           DATA MANAGEMENT CARD
+        ════════════════════════════════════════════════════ */
+        /* ════════════════════════════════════════════════════
+           RESET: BACKUP → CLEAR → RELOAD
+        ════════════════════════════════════════════════════ */
+
+        /**
+         * Opens the confirmation dialog.
+         * Actual work happens in confirmReset() after user clicks Confirm.
+         */
+        function backupAndReset() {
+            const overlay = document.getElementById('reset-overlay');
+            if (overlay) overlay.classList.add('show');
+        }
+
+        function closeResetDialog() {
+            const overlay = document.getElementById('reset-overlay');
+            if (overlay) overlay.classList.remove('show');
+        }
+
+        async function confirmReset() {
+            const btn = document.getElementById('rd-confirm-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Backing up…'; }
+
+            try {
+                const ok = await exportBackupJSON();
+                if (!ok) {
+                    // exportBackupJSON already reported the error
+                    if (btn) { btn.disabled = false; btn.textContent = 'Confirm Reset'; }
+                    closeResetDialog();
+                    return;
+                }
+
+                clearAppStorage();
+
+                // Brief pause so the download can register before reload
+                setTimeout(() => window.location.reload(), 600);
+
+            } catch(e) {
+                setDMStatus('Reset aborted — backup failed: ' + e.message, 'error');
+                if (btn) { btn.disabled = false; btn.textContent = 'Confirm Reset'; }
+                closeResetDialog();
+            }
+        }
+
+        /**
+         * Generates and downloads a complete backup JSON.
+         * Returns true on success, false on failure.
+         * Never throws — failures are caught and reported via setDMStatus.
+         */
+        async function exportBackupJSON() {
+            try {
+                await flushToDB();
+                const store = loadStore();
+
+                // Build responses array in the standard v1.0 field format
+                const responses = Object.entries(store.respondents || {}).map(([id, r]) => ({
+                    id,
+                    respondent: {
+                        name:      (r.meta && r.meta.name)      || '',
+                        age:       (r.meta && r.meta.age)       || '',
+                        gender:    (r.meta && r.meta.gender)    || '',
+                        education: (r.meta && r.meta.education) || ''
+                    },
+                    answers:    flattenAnswers(r.answers || {}),
+                    start_time: r.startTime || '',
+                    end_time:   r.endTime   || '',
+                    completed:  r.completed || false
+                }));
+
+                const payload = {
+                    version:          '1.0',
+                    export_timestamp: new Date().toISOString(),
+                    backup_reason:    'pre_reset',
+                    survey_info: {
+                        id:           surveyConfig ? (surveyConfig.surveyId    || '') : '',
+                        name:         surveyConfig ? (surveyConfig.surveyTitle || surveyConfig.projectTitle || '') : '',
+                        organization: surveyConfig ? (surveyConfig.organization || '') : '',
+                        location:     surveyConfig ? (surveyConfig.location     || '') : ''
+                    },
+                    enumerator_info: {
+                        name: _enumeratorId || ''
+                    },
+                    responses
+                };
+
+                // Filename: enumerator-backup-YYYYMMDD-HHMM.json
+                const now = new Date();
+                const ymd = now.getFullYear().toString()
+                    + String(now.getMonth() + 1).padStart(2, '0')
+                    + String(now.getDate()).padStart(2, '0');
+                const hm  = String(now.getHours()).padStart(2, '0')
+                    + String(now.getMinutes()).padStart(2, '0');
+                const fileName = `enumerator-backup-${ymd}-${hm}.json`;
+
+                downloadText(JSON.stringify(payload, null, 2), fileName, 'application/json');
+                return true;
+
+            } catch(e) {
+                setDMStatus('Backup failed — reset aborted. (' + e.message + ')', 'error');
+                return false;
+            }
+        }
+
+        /**
+         * Removes all app-related localStorage keys.
+         * Also clears the IDB survey store for this session.
+         * Does NOT call localStorage.clear() — only removes known lms_* keys.
+         */
+        function clearAppStorage() {
+            // Collect all lms_* keys (covers all surveyId variants)
+            const keysToRemove = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                const key = localStorage.key(i);
+                if (key && key.startsWith('lms_')) {
+                    keysToRemove.push(key);
+                }
+            }
+            keysToRemove.forEach(k => {
+                try { localStorage.removeItem(k); } catch(e) { /* silent */ }
+            });
+
+            // Also wipe the IDB survey store entry for this session
+            if (_db) {
+                try {
+                    const tx    = _db.transaction('surveys', 'readwrite');
+                    const store = tx.objectStore('surveys');
+                    store.clear();
+                } catch(e) { /* non-critical — page reloads immediately */ }
+            }
+        }
+
+        /* ════════════════════════════════════════════════════
+           UPLOAD TO BACKEND SERVER
+        ════════════════════════════════════════════════════ */
+        const BACKEND_URL = 'https://labour-market-survey-backend-production.up.railway.app';
+
+        async function uploadToServer() {
+            const btn = document.getElementById('upload-to-server-btn');
+            if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
+
+            try {
+                await flushToDB();
+                const store = loadStore();
+                const responses = Object.entries(store.respondents || {}).map(([id, r]) => ({
+                    id,
+                    respondent: {
+                        name:      (r.meta && r.meta.name)      || '',
+                        age:       (r.meta && r.meta.age)       || '',
+                        gender:    (r.meta && r.meta.gender)    || '',
+                        education: (r.meta && r.meta.education) || ''
+                    },
+                    answers:    flattenAnswers(r.answers || {}),
+                    start_time: r.startTime || '',
+                    end_time:   r.endTime   || '',
+                    completed:  r.completed || false
+                }));
+
+                if (responses.length === 0) {
+                    setDMStatus('No responses to upload.', 'error');
+                    return;
+                }
+
+                const payload = {
+                    version:          '1.0',
+                    export_timestamp: new Date().toISOString(),
+                    survey_info: {
+                        id:           surveyConfig ? (surveyConfig.surveyId    || '') : '',
+                        name:         surveyConfig ? (surveyConfig.surveyTitle || surveyConfig.projectTitle || '') : '',
+                        organization: surveyConfig ? (surveyConfig.organization || '') : '',
+                        location:     surveyConfig ? (surveyConfig.location     || '') : ''
+                    },
+                    enumerator_info: { name: _enumeratorId || '' },
+                    responses
+                };
+
+                const res  = await fetch(`${BACKEND_URL}/api/import`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(payload)
+                });
+
+                const data = await res.json();
+
+                if (!res.ok) throw new Error(data.error || 'Server error');
+
+                setDMStatus(
+                    `✓ Uploaded: +${data.added} new, ${data.skipped} already on server.`,
+                    'success'
+                );
+
+            } catch (e) {
+                setDMStatus('Upload failed: ' + e.message, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.textContent = '☁ Upload to Server'; }
+            }
+        }
+
+        function buildDataManagementCard() {
+            return `
+                <div class="data-mgmt-card">
+                    <h2>Data Management</h2>
+                    <div class="dm-actions">
+                        <button class="dm-action-btn export-primary" onclick="exportJSON()">Export JSON</button>
+                        <button class="dm-action-btn" onclick="exportExcel()">Export Excel / CSV</button>
+                        <button class="dm-action-btn import-btn" onclick="triggerImport()">Import Data</button>
+                        <button class="dm-action-btn upload-btn" id="upload-to-server-btn" onclick="uploadToServer()">☁ Upload to Server</button>
+                    </div>
+                    <div class="dm-status" id="dm-status"></div>
+                    <div class="dm-reset-row">
+                        <span class="dm-reset-label">Danger zone</span>
+                        <button class="dm-reset-btn" onclick="backupAndReset()">🗑 Reset Local Data</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function setDMStatus(msg, type) {
+            const el = document.getElementById('dm-status');
+            if (!el) return;
+            el.textContent  = msg;
+            el.className    = 'dm-status ' + (type || '');
+        }
+
+        /* ════════════════════════════════════════════════════
+           ENUMERATOR BAR  (rendered inside survey)
+        ════════════════════════════════════════════════════ */
+        function buildEnumeratorBar() {
+            return `
+                <div class="enumerator-bar">
+                    <label>Enumerator:</label>
+                    <span id="eb-name-display" class="eb-val">${_enumeratorId || '—'}</span>
+                    <button class="eb-save-btn" onclick="showEnumeratorGate()">Change</button>
+                </div>
+            `;
+        }
+
+        /* ════════════════════════════════════════════════════
+           DOWNLOAD HELPERS
+        ════════════════════════════════════════════════════ */
+        function downloadText(content, fileName, mimeType) {
+            const blob = new Blob([content], { type: mimeType });
+            const url  = URL.createObjectURL(blob);
+            const a    = document.createElement('a');
+            a.href     = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function showLoading(msg) {
+            const overlay = document.getElementById('loading-overlay');
+            const label   = document.getElementById('loading-msg');
+            if (label) label.textContent = msg || 'Processing…';
+            if (overlay) overlay.classList.add('show');
+        }
+
+        function hideLoading() {
+            const overlay = document.getElementById('loading-overlay');
+            if (overlay) overlay.classList.remove('show');
+        }
+
+        /* ════════════════════════════════════════════════════
+           INIT
+        ════════════════════════════════════════════════════ */
+        async function init() {
+            const hash = window.location.hash.substring(1);
+            if (!hash) { showError('No survey data found in URL'); return; }
+
+            try {
+                let decoded;
+                if (hash.startsWith('lz:')) {
+                    decoded = LZString.decompressFromEncodedURIComponent(hash.slice(3));
+                } else {
+                    decoded = decodeUTF8Base64(hash);
+                }
+                surveyConfig = JSON.parse(decoded);
+            } catch(e) {
+                showError('Invalid survey configuration');
+                return;
+            }
+
+            STORE_KEY = 'lms_respondents_' + (surveyConfig.surveyId || 'default');
+
+            try { _db = await openDB(); } catch(e) { _db = null; }
+
+            await loadEnumeratorId();
+            await loadStoreFromDB();
+
+            _memStore = migrateLegacyData(_memStore);
+            _memStore = ensureActiveRespondent(_memStore);
+            saveStore(_memStore);
+
+            renderSurvey(_memStore);
+
+            if (!_enumeratorId) {
+                setTimeout(showEnumeratorGate, 300);
+            }
+
+            loadSheetJS();
+        }
+
+        function loadSheetJS() {
+            if (typeof XLSX !== 'undefined') return;
+            const s   = document.createElement('script');
+            s.src     = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+            s.onerror = () => {};
+            document.head.appendChild(s);
+        }
+
+        function showError(message) {
+            document.getElementById('app').innerHTML = `
+                <div class="error-screen">
+                    <div class="error-icon">⚠️</div>
+                    <h2>Error Loading Survey</h2>
+                    <p>${message}</p>
+                    <p style="margin-top:1rem;">Please contact your administrator for a valid survey link.</p>
+                </div>`;
+        }
+
+        /* ════════════════════════════════════════════════════
+           RENDER  (unchanged except enumerator bar + data mgmt)
+        ════════════════════════════════════════════════════ */
+        function renderSurvey(store) {
+            if (!store) store = loadStore();
+            const app          = document.getElementById('app');
+            const displayTitle = surveyConfig.surveyTitle || surveyConfig.projectTitle || 'Labour Market Survey';
+
+            let html = `
+                <header>
+                    <h1>${displayTitle}</h1>
+                    <p>${surveyConfig.organization || ''}</p>
+                </header>
+                <div class="container">
+            `;
+
+            if (surveyConfig.surveyObjective || surveyConfig.enumeratorInstructions) {
+                html += `<div class="intro-card">`;
+                if (surveyConfig.surveyObjective) {
+                    html += `<h2>Survey Objective</h2><p>${surveyConfig.surveyObjective}</p>`;
+                }
+                if (surveyConfig.enumeratorInstructions) {
+                    html += `<h2 style="margin-top:1.5rem;">Instructions</h2><p>${surveyConfig.enumeratorInstructions}</p>`;
+                }
+                html += `</div>`;
+            }
+
+            html += buildEnumeratorBar();
+            html += buildRespondentManager(store);
+
+            html += `
+                <div class="profile-card">
+                    <h2>Respondent Information</h2>
+                    <div class="profile-group">
+                        <label class="profile-label" for="profile-name">Respondent Name (Optional)</label>
+                        <input type="text" id="profile-name" placeholder="Enter respondent name">
+                    </div>
+                    <div class="profile-group">
+                        <label class="profile-label" for="profile-age">Age</label>
+                        <select id="profile-age">
+                            <option value="">-- Select Age --</option>
+                            <option value="18-24">18-24</option>
+                            <option value="25-34">25-34</option>
+                            <option value="35-44">35-44</option>
+                            <option value="45-54">45-54</option>
+                            <option value="55+">55+</option>
+                        </select>
+                    </div>
+                    <div class="profile-group">
+                        <label class="profile-label" for="profile-gender">Gender</label>
+                        <select id="profile-gender">
+                            <option value="">-- Select Gender --</option>
+                            <option value="Male">Male</option>
+                            <option value="Female">Female</option>
+                            <option value="Prefer not to say">Prefer not to say</option>
+                        </select>
+                    </div>
+                    <div class="profile-group">
+                        <label class="profile-label" for="profile-education">Education (Optional)</label>
+                        <input type="text" id="profile-education" placeholder="Enter education level">
+                    </div>
+                </div>
+            `;
+
+            surveyConfig.sections.forEach((section, sIndex) => {
+                html += `
+                    <div class="section-card">
+                        <div class="section-title">${section.title}</div>
+                        ${section.instructions ? `<div class="section-instructions">${section.instructions}</div>` : ''}
+                `;
+
+                section.questions.forEach((question, qIndex) => {
+                    const qId = `q-${sIndex}-${qIndex}`;
+                    html += `
+                        <div class="question-group">
+                            <label class="question-label" for="${qId}">
+                                ${question.text}
+                                ${question.required ? '<span class="required">*</span>' : ''}
+                            </label>
+                    `;
+
+                    if (question.type === 'text') {
+                        html += `<textarea id="${qId}" data-section="${sIndex}" data-question="${qIndex}" data-required="${question.required}" placeholder="Enter your answer here..."></textarea>`;
+                    } else if (question.type === 'yesno') {
+                        html += `
+                            <div class="radio-group">
+                                <div class="radio-option">
+                                    <input type="radio" id="${qId}-yes" name="${qId}" value="Yes" data-section="${sIndex}" data-question="${qIndex}" data-required="${question.required}">
+                                    <label for="${qId}-yes">Yes</label>
+                                </div>
+                                <div class="radio-option">
+                                    <input type="radio" id="${qId}-no" name="${qId}" value="No" data-section="${sIndex}" data-question="${qIndex}" data-required="${question.required}">
+                                    <label for="${qId}-no">No</label>
+                                </div>
+                            </div>`;
+                    } else if (question.type === 'scale') {
+                        const scaleDef = getScaleDefinition(question);
+                        html += `<div class="scale-group">`;
+                        if (scaleDef && scaleDef.labels) {
+                            scaleDef.labels.forEach((label, index) => {
+                                html += `
+                                    <div class="scale-option">
+                                        <input type="radio" id="${qId}-${index}" name="${qId}" value="${label}" data-section="${sIndex}" data-question="${qIndex}" data-required="${question.required}">
+                                        <span class="scale-number">${index+1}.</span>
+                                        <label class="scale-label" for="${qId}-${index}">${label}</label>
+                                    </div>`;
+                            });
+                        } else {
+                            const scale = scaleDef ? scaleDef.points : (question.scale || 5);
+                            for (let i = 1; i <= scale; i++) {
+                                html += `
+                                    <div class="scale-option">
+                                        <input type="radio" id="${qId}-${i}" name="${qId}" value="${i}" data-section="${sIndex}" data-question="${qIndex}" data-required="${question.required}">
+                                        <span class="scale-number">${i}</span>
+                                        <label class="scale-label" for="${qId}-${i}">Option ${i}</label>
+                                    </div>`;
+                            }
+                        }
+                        html += `</div>`;
+                    }
+
+                    html += `
+                            <div class="validation-error" id="error-${qId}">This field is required</div>
+                        </div>`;
+                });
+
+                html += `</div>`;
+            });
+
+            html += buildDataManagementCard();
+
+            html += `</div>
+                <div class="submit-container">
+                    <button class="submit-btn" onclick="submitSurvey()">Submit Survey</button>
+                </div>`;
+
+            app.innerHTML = html;
+            attachEventListeners();
+
+            const active = getActiveRespondent(store);
+            if (active) loadRespondentIntoForm(active);
+            updateStats(store);
+        }
+
+        /* ════════════════════════════════════════════════════
+           EVENT LISTENERS  (unchanged)
+        ════════════════════════════════════════════════════ */
+        function attachEventListeners() {
+            const profileFields = [
+                { id: 'profile-name',      key: 'name'      },
+                { id: 'profile-age',       key: 'age'       },
+                { id: 'profile-gender',    key: 'gender'    },
+                { id: 'profile-education', key: 'education' }
+            ];
+
+            profileFields.forEach(({ id, key }) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                const ev = el.tagName === 'SELECT' ? 'change' : 'input';
+                el.addEventListener(ev, function() {
+                    profileData[key] = this.value;
+                    autosave();
+                });
+            });
+
+            document.querySelectorAll('textarea').forEach(textarea => {
+                textarea.addEventListener('input', function() {
+                    const sIndex   = this.dataset.section;
+                    const qIndex   = this.dataset.question;
+                    const question = surveyConfig.sections[sIndex].questions[qIndex];
+                    if (!formData[sIndex]) formData[sIndex] = {};
+                    formData[sIndex][qIndex] = { question: question.text, answer: this.value };
+                    const errorDiv = document.getElementById(`error-q-${sIndex}-${qIndex}`);
+                    if (errorDiv) errorDiv.classList.remove('show');
+                    autosave();
+                });
+            });
+
+            document.querySelectorAll('input[type="radio"]').forEach(radio => {
+                radio.addEventListener('change', function() {
+                    const sIndex   = this.dataset.section;
+                    const qIndex   = this.dataset.question;
+                    const question = surveyConfig.sections[sIndex].questions[qIndex];
+                    if (!formData[sIndex]) formData[sIndex] = {};
+                    formData[sIndex][qIndex] = { question: question.text, answer: this.value };
+                    const errorDiv = document.getElementById(`error-q-${sIndex}-${qIndex}`);
+                    if (errorDiv) errorDiv.classList.remove('show');
+                    autosave();
+                });
+            });
+        }
+
+        /* ════════════════════════════════════════════════════
+           SUBMIT  (performance: no full re-render)
+        ════════════════════════════════════════════════════ */
+        function submitSurvey() {
+            if (!_enumeratorId) {
+                showEnumeratorGate();
+                return;
+            }
+
+            let isValid = true;
+            const errors = [];
+
+            surveyConfig.sections.forEach((section, sIndex) => {
+                section.questions.forEach((question, qIndex) => {
+                    if (question.required) {
+                        const hasAnswer = formData[sIndex] && formData[sIndex][qIndex] && formData[sIndex][qIndex].answer;
+                        if (!hasAnswer) {
+                            isValid = false;
+                            const errorDiv = document.getElementById(`error-q-${sIndex}-${qIndex}`);
+                            if (errorDiv) errorDiv.classList.add('show');
+                            errors.push(`error-q-${sIndex}-${qIndex}`);
+                        }
+                    }
+                });
+            });
+
+            if (!isValid) {
+                if (errors.length > 0) {
+                    const firstError = document.getElementById(errors[0]);
+                    if (firstError) firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                return;
+            }
+
+            const store = loadStore();
+            const id    = store.activeRespondentId;
+            if (!id || !store.respondents[id]) return;
+
+            store.respondents[id].meta      = { ...profileData };
+            store.respondents[id].answers   = JSON.parse(JSON.stringify(formData));
+            store.respondents[id].endTime   = new Date().toISOString();
+            store.respondents[id].completed = true;
+
+            const surveyId    = surveyConfig.surveyId || 'default';
+            const legacyKey   = 'lms_responses_' + surveyId;
+            const flatAnswers = flattenAnswers(formData);
+            try {
+                const legacyArr = JSON.parse(localStorage.getItem(legacyKey) || '[]');
+                legacyArr.push({
+                    timestamp:    new Date().toISOString(),
+                    meta:         { ...profileData, enumeratorId: _enumeratorId },
+                    answers:      flatAnswers
+                });
+                localStorage.setItem(legacyKey,       JSON.stringify(legacyArr));
+                localStorage.setItem('lms_responses', JSON.stringify(legacyArr));
+            } catch(e) { /* quota exceeded */ }
+
+            saveStore(store);
+            showSuccessModal();
+
+            formData    = {};
+            profileData = {};
+
+            const newId = generateId(store);
+            store.respondents[newId] = emptyRespondent();
+            store.activeRespondentId = newId;
+            saveStore(store);
+
+            clearForm();
+            rebuildDropdown(store);
+            updateBadge(newId);
+            updateStats(store);
+        }
+
+        function showSuccessModal() {
+            document.getElementById('success-modal').classList.add('show');
+        }
+
+        function closeSuccessModal() {
+            document.getElementById('success-modal').classList.remove('show');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        window.addEventListener('beforeunload', () => {
+            clearTimeout(_idbFlushTimer);
+            if (_idbDirty) {
+                try { localStorage.setItem(STORE_KEY, JSON.stringify(_memStore)); } catch(e) {}
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
