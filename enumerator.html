@@ -613,20 +613,6 @@
             color: white;
         }
 
-        .dm-action-btn.upload-btn {
-            border-color: #6f42c1;
-            color: #6f42c1;
-        }
-
-        .dm-action-btn.upload-btn:hover {
-            background: #6f42c1;
-            color: white;
-        }
-
-        .dm-action-btn.upload-btn:disabled {
-            opacity: 0.55;
-            cursor: default;
-        }
 
         .dm-status {
             font-size: 0.8rem;
@@ -1796,67 +1782,6 @@
             }
         }
 
-        async function uploadToServer() {
-            const btn = document.getElementById('upload-to-server-btn');
-            if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
-
-            try {
-                await flushToDB();
-                const store = loadStore();
-                const responses = Object.entries(store.respondents || {}).map(([id, r]) => ({
-                    id,
-                    respondent: {
-                        name:      (r.meta && r.meta.name)      || '',
-                        age:       (r.meta && r.meta.age)       || '',
-                        gender:    (r.meta && r.meta.gender)    || '',
-                        education: (r.meta && r.meta.education) || ''
-                    },
-                    answers:    flattenAnswers(r.answers || {}),
-                    start_time: r.startTime || '',
-                    end_time:   r.endTime   || '',
-                    completed:  r.completed || false
-                }));
-
-                if (responses.length === 0) {
-                    setDMStatus('No responses to upload.', 'error');
-                    return;
-                }
-
-                const payload = {
-                    version:          '1.0',
-                    export_timestamp: new Date().toISOString(),
-                    survey_info: {
-                        id:           surveyConfig ? (surveyConfig.surveyId    || '') : '',
-                        name:         surveyConfig ? (surveyConfig.surveyTitle || surveyConfig.projectTitle || '') : '',
-                        organization: surveyConfig ? (surveyConfig.organization || '') : '',
-                        location:     surveyConfig ? (surveyConfig.location     || '') : ''
-                    },
-                    enumerator_info: { name: _enumeratorId || '' },
-                    responses
-                };
-
-                const res  = await fetch(`${BACKEND_URL}/api/import`, {
-                    method:  'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body:    JSON.stringify(payload)
-                });
-
-                const data = await res.json();
-
-                if (!res.ok) throw new Error(data.error || 'Server error');
-
-                setDMStatus(
-                    `✓ Uploaded: +${data.added} new, ${data.skipped} already on server.`,
-                    'success'
-                );
-
-            } catch (e) {
-                setDMStatus('Upload failed: ' + e.message, 'error');
-            } finally {
-                if (btn) { btn.disabled = false; btn.textContent = '☁ Upload to Server'; }
-            }
-        }
-
         function buildDataManagementCard() {
             return `
                 <div class="data-mgmt-card">
@@ -1865,7 +1790,6 @@
                         <button class="dm-action-btn export-primary" onclick="exportJSON()">Export JSON</button>
                         <button class="dm-action-btn" onclick="exportExcel()">Export Excel / CSV</button>
                         <button class="dm-action-btn import-btn" onclick="triggerImport()">Import Data</button>
-                        <button class="dm-action-btn upload-btn" id="upload-to-server-btn" onclick="uploadToServer()">☁ Upload to Server</button>
                     </div>
                     <div class="dm-status" id="dm-status"></div>
                     <div class="dm-reset-row">
@@ -2286,7 +2210,7 @@
             const synced    = (document.getElementById('dm-status') || {}).textContent || '';
             if (completed.length > 0 && !synced.includes('saved to server')) {
                 e.preventDefault();
-                e.returnValue = `${completed.length} response(s) may not be uploaded. Use "Upload to Server" before closing.`;
+                e.returnValue = `${completed.length} response(s) may not have been uploaded to the server yet.`;
             }
         });
 

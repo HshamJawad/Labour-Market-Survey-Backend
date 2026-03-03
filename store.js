@@ -62,7 +62,10 @@ function getSurveys() {
 
 /** Insert one response; skip if pk already exists */
 function insertResponse(doc) {
-    const pk = `${doc.surveyId}::${doc.respondentId}`;
+    // pk includes enumeratorId so two enumerators with the same respondentId
+    // (e.g. both start at LMS-00001 after a reset) are stored as separate records
+    const enumPart = (doc.enumeratorId || 'anon').replace(/::/g, '-');
+    const pk = `${doc.surveyId}::${enumPart}::${doc.respondentId}`;
     if (_data.responses[pk]) return { ok: false, pk };
     _data.responses[pk] = { ...doc, _pk: pk, savedAt: new Date().toISOString() };
     persist();

@@ -1,0 +1,4037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Labour Market Survey Tool – Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+            background: #f5f5f5;
+            color: #2c3e50;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            min-height: 100vh;
+        }
+
+        header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            opacity: 0.9;
+            font-size: 0.95rem;
+        }
+
+        .header-actions {
+            margin-top: 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .tabs {
+            display: flex;
+            background: white;
+            border-bottom: 2px solid #e0e0e0;
+            padding: 0 2rem;
+            gap: 0.5rem;
+        }
+
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            color: #666;
+            font-size: 0.95rem;
+            font-weight: 500;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .tab:hover {
+            color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+            background: #f8f9fa;
+        }
+
+        .tab-content {
+            display: none;
+            padding: 2rem;
+            animation: fadeIn 0.3s;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .tab-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .tab-header h2 {
+            margin: 0;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #2c3e50;
+            font-size: 0.95rem;
+        }
+
+        input[type="text"],
+        textarea,
+        select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        input[type="text"]:focus,
+        textarea:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-outline {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-outline:hover {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .sector-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .sector-tag {
+            background: #e9ecef;
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.9rem;
+        }
+
+        .sector-tag button {
+            background: none;
+            border: none;
+            color: #dc3545;
+            cursor: pointer;
+            font-size: 1.2rem;
+            line-height: 1;
+            padding: 0;
+        }
+
+        .question-library {
+            margin-top: 1.5rem;
+        }
+
+        .question-item {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .question-item:hover {
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .question-header {
+            display: flex;
+            gap: 1rem;
+            align-items: flex-start;
+        }
+
+        .question-checkbox {
+            margin-top: 0.25rem;
+        }
+
+        .question-content {
+            flex: 1;
+        }
+
+        .question-text {
+            font-weight: 500;
+            margin-bottom: 0.75rem;
+            color: #2c3e50;
+        }
+
+        .question-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .source-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .section-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .section-questions {
+            margin-top: 1rem;
+        }
+
+        .survey-question {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+        }
+
+        .question-controls {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            margin-top: 0.75rem;
+        }
+
+        .response-stats {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-item {
+            margin-bottom: 1rem;
+        }
+
+        .stat-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            color: #667eea;
+            font-weight: 700;
+        }
+
+        .link-section {
+            background: #e7f3ff;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .link-display {
+            background: white;
+            padding: 0.75rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+            word-break: break-all;
+            font-family: monospace;
+            font-size: 0.85rem;
+        }
+
+        .response-list {
+            margin-top: 1.5rem;
+        }
+
+        .response-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .response-header {
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #667eea;
+        }
+
+        .response-answer {
+            margin-bottom: 0.75rem;
+        }
+
+        .response-question {
+            font-weight: 500;
+            color: #495057;
+        }
+
+        .response-value {
+            color: #2c3e50;
+            margin-top: 0.25rem;
+        }
+
+        .counts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .count-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1rem;
+        }
+
+        .count-question {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .count-items {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .count-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+        }
+
+        .count-label {
+            color: #495057;
+            font-size: 0.9rem;
+        }
+
+        .count-value {
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .scale-options {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .scale-options input[type="radio"] {
+            cursor: pointer;
+        }
+
+        .inline-flex {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+        }
+
+        .export-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .export-section h3 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .export-buttons {
+            display: flex;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .scale-template-selector {
+            margin-top: 0.5rem;
+            padding: 0.75rem;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .scale-labels-editor {
+            margin-top: 0.75rem;
+            padding: 0.75rem;
+            background: #fff;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+        }
+
+        .scale-label-input {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .scale-label-input input {
+            flex: 1;
+            padding: 0.5rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .scale-label-number {
+            font-weight: 600;
+            color: #667eea;
+            min-width: 30px;
+        }
+
+        .scale-preview {
+            margin-top: 0.5rem;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
+        .charts-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid #dee2e6;
+        }
+
+        .chart-container {
+            margin-bottom: 2rem;
+        }
+
+        .chart-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1rem;
+        }
+
+        .bar-chart {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .bar-row {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .bar-label {
+            min-width: 120px;
+            font-size: 0.85rem;
+            color: #495057;
+            text-align: right;
+        }
+
+        .bar-track {
+            flex: 1;
+            height: 28px;
+            background: #e9ecef;
+            border-radius: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+
+        .bar-value {
+            min-width: 50px;
+            text-align: right;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .diverging-chart {
+            margin-top: 1rem;
+        }
+
+        .diverging-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .diverging-label {
+            flex: 0 0 150px;
+            font-size: 0.85rem;
+            color: #495057;
+            text-align: right;
+            padding-right: 1rem;
+        }
+
+        .diverging-bars {
+            flex: 1;
+            display: flex;
+            height: 28px;
+            position: relative;
+        }
+
+        .diverging-left {
+            height: 100%;
+            background: #dc3545;
+            border-radius: 4px 0 0 4px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            padding-left: 0.5rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+
+        .diverging-right {
+            height: 100%;
+            background: #28a745;
+            border-radius: 0 4px 4px 0;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 0.5rem;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: 600;
+            transition: width 0.5s ease;
+        }
+
+        .diverging-center {
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            width: 2px;
+            height: 100%;
+            background: #6c757d;
+        }
+
+        .survey-id-badge {
+            display: inline-block;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-top: 0.5rem;
+        }
+
+        .info-banner {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #856404;
+            font-size: 0.9rem;
+        }
+
+        .filter-panel {
+            background: #f8f9fa;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-panel h3 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .filter-group label {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .filter-group select {
+            padding: 0.5rem;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            font-size: 0.9rem;
+        }
+
+        .filter-status {
+            background: #e7f3ff;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            color: #495057;
+            margin-top: 1rem;
+            border-left: 4px solid #667eea;
+        }
+
+        .filter-status strong {
+            color: #2c3e50;
+        }
+
+        .no-data-message {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 6px;
+            padding: 2rem;
+            text-align: center;
+            color: #856404;
+            font-size: 1rem;
+            margin: 1rem 0;
+        }
+
+        /* === PHASE 4: Multi-Survey Styles === */
+        .survey-card {
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .survey-card:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .survey-card.active {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .survey-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 1rem;
+        }
+
+        .survey-card-title {
+            flex: 1;
+        }
+
+        .survey-card-title h3 {
+            margin: 0 0 0.5rem 0;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        .survey-card-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .survey-card-meta {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+            font-size: 0.85rem;
+            color: #495057;
+        }
+
+        .survey-status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .survey-status-badge.draft {
+            background: #ffc107;
+            color: #856404;
+        }
+
+        .survey-status-badge.published {
+            background: #28a745;
+            color: white;
+        }
+
+        .survey-status-badge.closed {
+            background: #6c757d;
+            color: white;
+        }
+
+        .survey-card-actions {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+
+        .survey-id-display {
+            font-family: monospace;
+            background: #e9ecef;
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.8rem;
+        }
+
+        .count-title {
+            font-weight: 600;
+            margin-bottom: 0.75rem;
+            color: #2c3e50;
+            font-size: 0.9rem;
+        }
+
+        .count-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0.5rem;
+            background: #f8f9fa;
+            border-radius: 4px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* QR Modal */
+        .qr-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.55);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+        }
+        .qr-modal-overlay.active {
+            display: flex;
+        }
+        .qr-modal {
+            background: white;
+            border-radius: 16px;
+            padding: 2.2rem;
+            max-width: 480px;
+            width: 94%;
+            text-align: center;
+            box-shadow: 0 24px 70px rgba(0,0,0,0.35);
+            position: relative;
+        }
+        .qr-modal h3 {
+            margin-bottom: 1.4rem;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+        #qr-canvas-container {
+            display: inline-block;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+            border: 3px solid #e9ecef;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+            margin-bottom: 1.4rem;
+        }
+        #qr-canvas-container canvas,
+        #qr-canvas-container img {
+            display: block;
+        }
+        .qr-modal-actions {
+            display: flex;
+            gap: 0.6rem;
+            justify-content: center;
+        }
+        .qr-modal-actions .btn {
+            flex: 1;
+            font-size: 0.84rem;
+            padding: 0.6rem 0.5rem;
+        }
+        .btn-qr {
+            background: #764ba2;
+            color: white;
+        }
+        .btn-qr:hover {
+            background: #5e3a82;
+            transform: translateY(-1px);
+        }
+
+        /* ── Import System ── */
+        .import-zone {
+            background: #f0fff4;
+            border: 2px dashed #28a745;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .import-zone:hover, .import-zone.drag-over {
+            background: #e6ffee;
+            border-color: #218838;
+        }
+        .import-zone-icon { font-size: 2rem; margin-bottom: 0.5rem; }
+        .import-zone p { color: #495057; font-size: 0.9rem; margin: 0; }
+        .import-zone strong { color: #218838; }
+        .import-log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            font-size: 0.82rem;
+            color: #495057;
+            margin-top: 0.75rem;
+            max-height: 100px;
+            overflow-y: auto;
+            display: none;
+            font-family: monospace;
+        }
+        .import-log.show { display: block; }
+        .import-log-line { margin-bottom: 0.15rem; }
+        .import-log-line.ok { color: #28a745; }
+        .import-log-line.warn { color: #856404; }
+        .import-log-line.err { color: #dc3545; }
+
+        /* ── Summary Cards ── */
+        .summary-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        .summary-card {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 1.1rem 1rem;
+            text-align: center;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+        }
+        .summary-card .sc-label {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-bottom: 0.4rem;
+        }
+        .summary-card .sc-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+        .summary-card.sc-completed .sc-value { color: #28a745; }
+        .summary-card.sc-incomplete .sc-value { color: #ffc107; }
+        .summary-card.sc-enumerators .sc-value { color: #764ba2; }
+
+        /* ── Enumerator breakdown table ── */
+        .enum-breakdown {
+            margin-top: 0.75rem;
+            font-size: 0.82rem;
+        }
+        .enum-breakdown-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.3rem 0;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .enum-breakdown-row:last-child { border-bottom: none; }
+
+        /* ── Imported responses table ── */
+        .imported-section {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-top: 4px solid #28a745;
+        }
+        .imported-section h3 { color: #2c3e50; margin-bottom: 0.5rem; }
+        .imported-table-wrap {
+            overflow-x: auto;
+            max-height: 420px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+        }
+        .imported-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.82rem;
+        }
+        .imported-table th {
+            background: #667eea;
+            color: white;
+            padding: 0.6rem 0.75rem;
+            text-align: left;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 2;
+        }
+        .imported-table td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid #f0f0f0;
+            white-space: nowrap;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .imported-table tr:hover td { background: #f8f9fa; }
+        .imported-table tr:nth-child(even) td { background: #fafafa; }
+        .imported-table tr:nth-child(even):hover td { background: #f0f4ff; }
+        .badge-complete {
+            background: #d4edda; color: #155724;
+            padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.75rem;
+        }
+        .badge-incomplete {
+            background: #fff3cd; color: #856404;
+            padding: 0.1rem 0.4rem; border-radius: 8px; font-size: 0.75rem;
+        }
+        .imported-empty {
+            text-align: center; padding: 2rem; color: #6c757d; font-size: 0.9rem;
+        }
+        .imported-pager {
+            display: flex; align-items: center; gap: 0.5rem;
+            padding: 0.6rem 0; font-size: 0.85rem; color: #495057;
+        }
+        .imported-pager button {
+            padding: 0.25rem 0.6rem; border: 1px solid #dee2e6;
+            border-radius: 4px; background: white; cursor: pointer; font-size: 0.82rem;
+        }
+        .imported-pager button:disabled { opacity: 0.4; cursor: default; }
+        .imported-pager button:hover:not(:disabled) { background: #f0f4ff; border-color: #667eea; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Labour Market Survey Tool – Admin</h1>
+            <p>Professional survey administration and analysis platform</p>
+            <div id="survey-id-display"></div>
+            <div class="header-actions">
+                <button class="btn btn-success btn-small" onclick="saveWork()">💾 Save Work (JSON)</button>
+                <button class="btn btn-primary btn-small" onclick="triggerLoadWork()">📂 Load Work (JSON)</button>
+                <button class="btn btn-danger btn-small" onclick="clearAllData()">🧹 Clear All Data</button>
+                <input type="file" id="load-work-file" accept=".json" onchange="loadWork(event)">
+                <input type="file" id="import-enum-files" accept=".json" multiple onchange="handleImportFiles(event)" style="display:none">
+            </div>
+        </header>
+
+        <div class="tabs">
+            <button class="tab active" data-tab="project-setup">Project Setup</button>
+            <button class="tab" data-tab="survey-forms">Survey Forms</button>
+            <button class="tab" data-tab="sectors">Sectors & Scope</button>
+            <button class="tab" data-tab="question-library">Question Library</button>
+            <button class="tab" data-tab="survey-structure">Survey Structure</button>
+            <button class="tab" data-tab="dashboard">Dashboard</button>
+        </div>
+
+        <div class="tab-content active" id="project-setup">
+            <div class="tab-header">
+                <h2>Project Setup</h2>
+                <button class="btn btn-danger btn-small" onclick="clearTabContent('project-setup')">🗑 Clear This Tab</button>
+            </div>
+            
+            <div class="form-group">
+                <label for="survey-id">Survey ID <span style="color: #dc3545;">*</span></label>
+                <input type="text" id="survey-id" placeholder="e.g., LM-2026-SKILLS" maxlength="50">
+                <small style="color: #6c757d; display: block; margin-top: 0.25rem;">
+                    Unique identifier for this survey. Cannot be changed after first save.
+                </small>
+            </div>
+            
+            <div class="form-group">
+                <label for="project-title">Project Title</label>
+                <input type="text" id="project-title" placeholder="Enter project title">
+            </div>
+            <div class="form-group">
+                <label for="organization">Organization</label>
+                <input type="text" id="organization" placeholder="Enter organization name">
+            </div>
+            <div class="form-group">
+                <label for="location">Country / City</label>
+                <input type="text" id="location" placeholder="Enter location">
+            </div>
+            <div class="form-group">
+                <label for="survey-objective">Survey Objective</label>
+                <textarea id="survey-objective" placeholder="Describe the survey objectives..."></textarea>
+            </div>
+            <div class="form-group">
+                <label for="enumerator-instructions">Enumerator Instructions</label>
+                <textarea id="enumerator-instructions" placeholder="Enter instructions for enumerators..."></textarea>
+            </div>
+        </div>
+
+        <div class="tab-content" id="survey-forms">
+            <div class="tab-header">
+                <h2>Survey Forms Management</h2>
+                <button class="btn btn-primary" onclick="createNewSurvey()">➕ Create New Survey</button>
+            </div>
+
+            <div class="info-banner" style="margin-bottom: 1.5rem;">
+                <strong>Multi-Survey Support:</strong> Create multiple survey forms within this project. Each survey has its own structure, enumerator link, and isolated responses.
+            </div>
+
+            <div id="surveys-list-container">
+                <!-- Survey cards will be rendered here -->
+            </div>
+        </div>
+
+        <div class="tab-content" id="sectors">
+            <div class="tab-header">
+                <h2>Sectors & Scope</h2>
+                <button class="btn btn-danger btn-small" onclick="clearTabContent('sectors')">🗑 Clear This Tab</button>
+            </div>
+            <div class="form-group">
+                <label for="sector-select">Select Predefined Sector</label>
+                <select id="sector-select">
+                    <option value="">-- Select a sector --</option>
+                    <option value="Construction">Construction</option>
+                    <option value="Automotive Services">Automotive Services</option>
+                    <option value="Healthcare">Healthcare</option>
+                    <option value="Agriculture">Agriculture</option>
+                    <option value="ICT">ICT</option>
+                    <option value="Tourism">Tourism</option>
+                    <option value="Oil & Gas">Oil & Gas</option>
+                    <option value="Informal Sector">Informal Sector</option>
+                </select>
+            </div>
+            <div style="display: flex; gap: 1rem; margin-bottom: 1.5rem;">
+                <button class="btn btn-primary" onclick="addPredefinedSector()">➕ Add Selected Sector</button>
+                <input type="text" id="custom-sector" placeholder="Or enter custom sector name" style="flex: 1;">
+                <button class="btn btn-success" onclick="addCustomSector()">➕ Add Custom</button>
+            </div>
+            <div class="sector-list" id="sector-list"></div>
+        </div>
+
+        <div class="tab-content" id="question-library">
+            <h2 style="margin-bottom: 1.5rem;">Question Library</h2>
+            <div class="form-group">
+                <label for="library-category">Category</label>
+                <select id="library-category" onchange="loadQuestionLibrary()">
+                    <option value="employer">Employer / Enterprise Survey</option>
+                    <option value="skills">Skills & Training Needs</option>
+                    <option value="market">Market Mapping & Anticipation</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="addSelectedQuestions()" style="margin-bottom: 1.5rem;">
+                ➕ Add Selected Questions to Survey Structure
+            </button>
+            <div class="question-library" id="library-questions"></div>
+        </div>
+
+        <div class="tab-content" id="survey-structure">
+            <div class="tab-header">
+                <h2>Survey Structure</h2>
+                <button class="btn btn-danger btn-small" onclick="clearTabContent('survey-structure')">🗑 Clear This Tab</button>
+            </div>
+            <button class="btn btn-primary" onclick="addSection()" style="margin-bottom: 1.5rem;">
+                ➕ Add Section
+            </button>
+            <div id="sections-container"></div>
+        </div>
+
+        <div class="tab-content" id="dashboard">
+            <div class="tab-header">
+                <h2>Dashboard</h2>
+                <button class="btn btn-danger btn-small" onclick="clearTabContent('dashboard')">🗑 Clear This Tab</button>
+            </div>
+            
+            <div class="link-section">
+                <h3 style="margin-bottom: 1rem;">Enumerator Link</h3>
+                <button class="btn btn-primary" onclick="generateEnumeratorLink()">Generate Link</button>
+                <button class="btn btn-secondary" onclick="copyEnumeratorLink()">Copy Link</button>
+                <button class="btn btn-success" onclick="openEnumeratorLink()">Open Link</button>
+                <button class="btn btn-qr" onclick="showQRModal()">&#x2BA1; QR Code</button>
+<div class="link-display" id="enumerator-link">Link will appear here after generation</div>
+</div>
+
+<!-- QR Modal -->
+<div class="qr-modal-overlay" id="qr-modal-overlay" onclick="if(event.target===this)closeQRModal()">
+  <div class="qr-modal">
+    <h3>&#x2BA1; Enumerator QR Code</h3>
+    <div id="qr-canvas-container"></div>
+    <div class="qr-modal-actions">
+      <button class="btn btn-secondary" onclick="copyQRImage()">📋 Copy Image</button>
+      <button class="btn btn-primary" onclick="downloadQR()">⬇ Download PNG</button>
+      <button class="btn btn-danger" onclick="closeQRModal()">✕ Close</button>
+    </div>
+  </div>
+</div>
+<div class="response-stats">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <h3>Response Statistics</h3>
+                <button class="btn btn-secondary btn-small" onclick="syncThenRefresh()">🔄 Refresh Responses</button>
+            </div>
+            <div class="stat-item">
+                <div class="stat-label">Total Responses</div>
+                <div class="stat-value" id="total-responses">0</div>
+            </div>
+        </div>
+
+        <div class="imported-section">
+            <h3>📥 Import Enumerator Data</h3>
+            <p style="font-size:0.85rem;color:#6c757d;margin-bottom:1rem;">Upload one or more JSON export files from enumerators. Duplicates are automatically skipped.</p>
+
+            <div style="display:flex;gap:0.75rem;flex-wrap:wrap;margin-bottom:1rem;">
+                <div class="filter-group" style="min-width:220px;">
+                    <label for="filter-survey-type" style="font-size:0.85rem;font-weight:600;color:#495057;">📋 Select Survey Type</label>
+                    <select id="filter-survey-type" onchange="onSurveyTypeFilterChange()" style="margin-top:0.35rem;">
+                        <option value="">— All Surveys —</option>
+                    </select>
+                </div>
+                <div class="filter-group" style="min-width:200px;">
+                    <label for="filter-enumerator" style="font-size:0.85rem;font-weight:600;color:#495057;">🪪 Filter by Enumerator</label>
+                    <select id="filter-enumerator" onchange="applyImportedFilters()" style="margin-top:0.35rem;">
+                        <option value="">— All Enumerators —</option>
+                    </select>
+                </div>
+                <div style="display:flex;align-items:flex-end;gap:0.5rem;">
+                    <button class="btn btn-success btn-small" onclick="document.getElementById('import-enum-files').click()">📂 Import Files</button>
+                    <button class="btn btn-primary btn-small" onclick="exportCombinedExcel()">📊 Export Filtered Excel</button>
+                    <button class="btn btn-danger btn-small" onclick="clearImportedData()">🗑 Clear Imported</button>
+                </div>
+            </div>
+
+            <div class="import-zone" id="import-drop-zone"
+                 onclick="document.getElementById('import-enum-files').click()"
+                 ondragover="event.preventDefault();this.classList.add('drag-over')"
+                 ondragleave="this.classList.remove('drag-over')"
+                 ondrop="handleImportDrop(event)">
+                <div class="import-zone-icon">📁</div>
+                <p><strong>Click to select</strong> or drag &amp; drop JSON export files here</p>
+                <p style="margin-top:0.25rem;">Multiple files supported · Duplicates skipped</p>
+            </div>
+            <div class="import-log" id="import-log"></div>
+
+            <div class="summary-grid" id="import-summary-grid" style="margin-top:1.25rem;">
+                <div class="summary-card">
+                    <div class="sc-label">Total Imported</div>
+                    <div class="sc-value" id="sc-total">0</div>
+                </div>
+                <div class="summary-card sc-completed">
+                    <div class="sc-label">Completed</div>
+                    <div class="sc-value" id="sc-completed">0</div>
+                </div>
+                <div class="summary-card sc-incomplete">
+                    <div class="sc-label">Incomplete</div>
+                    <div class="sc-value" id="sc-incomplete">0</div>
+                </div>
+                <div class="summary-card sc-enumerators">
+                    <div class="sc-label">Enumerators</div>
+                    <div class="sc-value" id="sc-enumerators">0</div>
+                </div>
+            </div>
+
+            <div id="enum-breakdown-container"></div>
+
+            <div id="imported-table-section" style="margin-top:1.25rem;"></div>
+        </div>
+
+        <div class="filter-panel">
+            <h3>Filter Results</h3>
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="filter-gender">Gender</label>
+                    <select id="filter-gender" onchange="applyFilters()">
+                        <option value="">All</option>
+                        <option value="Male">Male</option>
+                        <option value="Female">Female</option>
+                        <option value="Prefer not to say">Prefer not to say</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-age">Age Group</label>
+                    <select id="filter-age" onchange="applyFilters()">
+                        <option value="">All</option>
+                        <option value="18-24">18-24</option>
+                        <option value="25-34">25-34</option>
+                        <option value="35-44">35-44</option>
+                        <option value="45-54">45-54</option>
+                        <option value="55+">55+</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-education">Education Level</label>
+                    <select id="filter-education" onchange="applyFilters()">
+                        <option value="">All</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="filter-sector">Sector</label>
+                    <select id="filter-sector" onchange="applyFilters()">
+                        <option value="">All</option>
+                        <option value="Agriculture">Agriculture</option>
+                        <option value="Manufacturing">Manufacturing</option>
+                        <option value="Services">Services</option>
+                        <option value="Construction">Construction</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="filter-status" id="filter-status">
+                <strong>Showing:</strong> All responses
+            </div>
+        </div>
+
+        <div class="filter-panel" style="margin-top: 1.5rem;">
+            <h3>Cross-Tabulation Analysis</h3>
+
+            <div class="filter-grid">
+                <div class="filter-group">
+                    <label for="crosstab-row-select">Row Variable</label>
+                    <select id="crosstab-row-select" onchange="updateCrosstab()">
+                        <option value="">-- Select row variable --</option>
+                        <option value="meta.gender">Gender</option>
+                        <option value="meta.age">Age Group</option>
+                        <option value="meta.education">Education Level</option>
+                        <option value="meta.sector">Sector</option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="crosstab-col-select">Column Variable</label>
+                    <select id="crosstab-col-select" onchange="updateCrosstab()">
+                        <option value="">-- Select column variable --</option>
+                        <option value="meta.gender">Gender</option>
+                        <option value="meta.age">Age Group</option>
+                        <option value="meta.education">Education Level</option>
+                        <option value="meta.sector">Sector</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="crosstab-container" style="margin-top: 1rem; overflow-x: auto;">
+                <div class="info-banner">
+                    Select row and column variables to generate cross-tabulation
+                </div>
+            </div>
+        </div>
+
+        <div class="charts-section" id="charts-section">
+            <h3 style="margin-bottom: 1.5rem;">Survey Visual Summary</h3>
+            <div id="charts-container"></div>
+        </div>
+
+        <div>
+            <h3 style="margin-bottom: 1rem;">Question Response Counts</h3>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <button class="btn btn-secondary btn-small" onclick="setCountMode('count')">
+                    🔢 Counts
+                </button>
+                <button class="btn btn-secondary btn-small" onclick="setCountMode('percent')">
+                    📊 Percent
+                </button>
+            </div>
+            <div class="counts-grid" id="response-counts"></div>
+        </div>
+
+        <div class="export-section">
+            <h3>Survey Design Export</h3>
+            <div class="export-buttons">
+                <button class="btn btn-primary" onclick="exportSurveyDefinition()">Export Survey Definition (JSON)</button>
+                <button class="btn btn-success" onclick="exportFullSurveyToExcel()">📊 Export Full Survey to Excel</button>
+            </div>
+        </div>
+
+        <div class="export-section">
+            <h3>Survey Responses Export</h3>
+            <div class="export-buttons">
+                <button class="btn btn-success" onclick="exportResponsesToExcel()">Export Responses to Excel (.xlsx)</button>
+            </div>
+        </div>
+
+        <div class="response-list">
+            <h3 style="margin-bottom: 1rem;">Recent Responses</h3>
+            <div id="responses-list"></div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/exceljs/4.3.0/exceljs.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.4.4/lz-string.min.js"></script>
+<script>
+var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this.parsedData=[];for(var b=[],d=0,e=this.data.length;e>d;d++){var f=this.data.charCodeAt(d);f>65536?(b[0]=240|(1835008&f)>>>18,b[1]=128|(258048&f)>>>12,b[2]=128|(4032&f)>>>6,b[3]=128|63&f):f>2048?(b[0]=224|(61440&f)>>>12,b[1]=128|(4032&f)>>>6,b[2]=128|63&f):f>128?(b[0]=192|(1984&f)>>>6,b[1]=128|63&f):b[0]=f,this.parsedData=this.parsedData.concat(b)}this.parsedData.length!=this.data.length&&(this.parsedData.unshift(191),this.parsedData.unshift(187),this.parsedData.unshift(239))}function b(a,b){this.typeNumber=a,this.errorCorrectLevel=b,this.modules=null,this.moduleCount=0,this.dataCache=null,this.dataList=[]}function i(a,b){if(void 0==a.length)throw new Error(a.length+"/"+b);for(var c=0;c<a.length&&0==a[c];)c++;this.num=new Array(a.length-c+b);for(var d=0;d<a.length-c;d++)this.num[d]=a[d+c]}function j(a,b){this.totalCount=a,this.dataCount=b}function k(){this.buffer=[],this.length=0}function m(){return"undefined"!=typeof CanvasRenderingContext2D}function n(){var a=!1,b=navigator.userAgent;return/android/i.test(b)&&(a=!0,aMat=b.toString().match(/android ([0-9]\.[0-9])/i),aMat&&aMat[1]&&(a=parseFloat(aMat[1]))),a}function r(a,b){for(var c=1,e=s(a),f=0,g=l.length;g>=f;f++){var h=0;switch(b){case d.L:h=l[f][0];break;case d.M:h=l[f][1];break;case d.Q:h=l[f][2];break;case d.H:h=l[f][3]}if(h>=e)break;c++}if(c>l.length)throw new Error("Too long data");return c}function s(a){var b=encodeURI(a).toString().replace(/\%[0-9a-fA-F]{2}/g,"a");return b.length+(b.length!=a?3:0)}a.prototype={getLength:function(){return this.parsedData.length},write:function(a){for(var b=0,c=this.parsedData.length;c>b;b++)a.put(this.parsedData[b],8)}},b.prototype={addData:function(b){var c=new a(b);this.dataList.push(c),this.dataCache=null},isDark:function(a,b){if(0>a||this.moduleCount<=a||0>b||this.moduleCount<=b)throw new Error(a+","+b);return this.modules[a][b]},getModuleCount:function(){return this.moduleCount},make:function(){this.makeImpl(!1,this.getBestMaskPattern())},makeImpl:function(a,c){this.moduleCount=4*this.typeNumber+17,this.modules=new Array(this.moduleCount);for(var d=0;d<this.moduleCount;d++){this.modules[d]=new Array(this.moduleCount);for(var e=0;e<this.moduleCount;e++)this.modules[d][e]=null}this.setupPositionProbePattern(0,0),this.setupPositionProbePattern(this.moduleCount-7,0),this.setupPositionProbePattern(0,this.moduleCount-7),this.setupPositionAdjustPattern(),this.setupTimingPattern(),this.setupTypeInfo(a,c),this.typeNumber>=7&&this.setupTypeNumber(a),null==this.dataCache&&(this.dataCache=b.createData(this.typeNumber,this.errorCorrectLevel,this.dataList)),this.mapData(this.dataCache,c)},setupPositionProbePattern:function(a,b){for(var c=-1;7>=c;c++)if(!(-1>=a+c||this.moduleCount<=a+c))for(var d=-1;7>=d;d++)-1>=b+d||this.moduleCount<=b+d||(this.modules[a+c][b+d]=c>=0&&6>=c&&(0==d||6==d)||d>=0&&6>=d&&(0==c||6==c)||c>=2&&4>=c&&d>=2&&4>=d?!0:!1)},getBestMaskPattern:function(){for(var a=0,b=0,c=0;8>c;c++){this.makeImpl(!0,c);var d=f.getLostPoint(this);(0==c||a>d)&&(a=d,b=c)}return b},createMovieClip:function(a,b,c){var d=a.createEmptyMovieClip(b,c),e=1;this.make();for(var f=0;f<this.modules.length;f++)for(var g=f*e,h=0;h<this.modules[f].length;h++){var i=h*e,j=this.modules[f][h];j&&(d.beginFill(0,100),d.moveTo(i,g),d.lineTo(i+e,g),d.lineTo(i+e,g+e),d.lineTo(i,g+e),d.endFill())}return d},setupTimingPattern:function(){for(var a=8;a<this.moduleCount-8;a++)null==this.modules[a][6]&&(this.modules[a][6]=0==a%2);for(var b=8;b<this.moduleCount-8;b++)null==this.modules[6][b]&&(this.modules[6][b]=0==b%2)},setupPositionAdjustPattern:function(){for(var a=f.getPatternPosition(this.typeNumber),b=0;b<a.length;b++)for(var c=0;c<a.length;c++){var d=a[b],e=a[c];if(null==this.modules[d][e])for(var g=-2;2>=g;g++)for(var h=-2;2>=h;h++)this.modules[d+g][e+h]=-2==g||2==g||-2==h||2==h||0==g&&0==h?!0:!1}},setupTypeNumber:function(a){for(var b=f.getBCHTypeNumber(this.typeNumber),c=0;18>c;c++){var d=!a&&1==(1&b>>c);this.modules[Math.floor(c/3)][c%3+this.moduleCount-8-3]=d}for(var c=0;18>c;c++){var d=!a&&1==(1&b>>c);this.modules[c%3+this.moduleCount-8-3][Math.floor(c/3)]=d}},setupTypeInfo:function(a,b){for(var c=this.errorCorrectLevel<<3|b,d=f.getBCHTypeInfo(c),e=0;15>e;e++){var g=!a&&1==(1&d>>e);6>e?this.modules[e][8]=g:8>e?this.modules[e+1][8]=g:this.modules[this.moduleCount-15+e][8]=g}for(var e=0;15>e;e++){var g=!a&&1==(1&d>>e);8>e?this.modules[8][this.moduleCount-e-1]=g:9>e?this.modules[8][15-e-1+1]=g:this.modules[8][15-e-1]=g}this.modules[this.moduleCount-8][8]=!a},mapData:function(a,b){for(var c=-1,d=this.moduleCount-1,e=7,g=0,h=this.moduleCount-1;h>0;h-=2)for(6==h&&h--;;){for(var i=0;2>i;i++)if(null==this.modules[d][h-i]){var j=!1;g<a.length&&(j=1==(1&a[g]>>>e));var k=f.getMask(b,d,h-i);k&&(j=!j),this.modules[d][h-i]=j,e--,-1==e&&(g++,e=7)}if(d+=c,0>d||this.moduleCount<=d){d-=c,c=-c;break}}}},b.PAD0=236,b.PAD1=17,b.createData=function(a,c,d){for(var e=j.getRSBlocks(a,c),g=new k,h=0;h<d.length;h++){var i=d[h];g.put(i.mode,4),g.put(i.getLength(),f.getLengthInBits(i.mode,a)),i.write(g)}for(var l=0,h=0;h<e.length;h++)l+=e[h].dataCount;if(g.getLengthInBits()>8*l)throw new Error("code length overflow. ("+g.getLengthInBits()+">"+8*l+")");for(g.getLengthInBits()+4<=8*l&&g.put(0,4);0!=g.getLengthInBits()%8;)g.putBit(!1);for(;;){if(g.getLengthInBits()>=8*l)break;if(g.put(b.PAD0,8),g.getLengthInBits()>=8*l)break;g.put(b.PAD1,8)}return b.createBytes(g,e)},b.createBytes=function(a,b){for(var c=0,d=0,e=0,g=new Array(b.length),h=new Array(b.length),j=0;j<b.length;j++){var k=b[j].dataCount,l=b[j].totalCount-k;d=Math.max(d,k),e=Math.max(e,l),g[j]=new Array(k);for(var m=0;m<g[j].length;m++)g[j][m]=255&a.buffer[m+c];c+=k;var n=f.getErrorCorrectPolynomial(l),o=new i(g[j],n.getLength()-1),p=o.mod(n);h[j]=new Array(n.getLength()-1);for(var m=0;m<h[j].length;m++){var q=m+p.getLength()-h[j].length;h[j][m]=q>=0?p.get(q):0}}for(var r=0,m=0;m<b.length;m++)r+=b[m].totalCount;for(var s=new Array(r),t=0,m=0;d>m;m++)for(var j=0;j<b.length;j++)m<g[j].length&&(s[t++]=g[j][m]);for(var m=0;e>m;m++)for(var j=0;j<b.length;j++)m<h[j].length&&(s[t++]=h[j][m]);return s};for(var c={MODE_NUMBER:1,MODE_ALPHA_NUM:2,MODE_8BIT_BYTE:4,MODE_KANJI:8},d={L:1,M:0,Q:3,H:2},e={PATTERN000:0,PATTERN001:1,PATTERN010:2,PATTERN011:3,PATTERN100:4,PATTERN101:5,PATTERN110:6,PATTERN111:7},f={PATTERN_POSITION_TABLE:[[],[6,18],[6,22],[6,26],[6,30],[6,34],[6,22,38],[6,24,42],[6,26,46],[6,28,50],[6,30,54],[6,32,58],[6,34,62],[6,26,46,66],[6,26,48,70],[6,26,50,74],[6,30,54,78],[6,30,56,82],[6,30,58,86],[6,34,62,90],[6,28,50,72,94],[6,26,50,74,98],[6,30,54,78,102],[6,28,54,80,106],[6,32,58,84,110],[6,30,58,86,114],[6,34,62,90,118],[6,26,50,74,98,122],[6,30,54,78,102,126],[6,26,52,78,104,130],[6,30,56,82,108,134],[6,34,60,86,112,138],[6,30,58,86,114,142],[6,34,62,90,118,146],[6,30,54,78,102,126,150],[6,24,50,76,102,128,154],[6,28,54,80,106,132,158],[6,32,58,84,110,136,162],[6,26,54,82,110,138,166],[6,30,58,86,114,142,170]],G15:1335,G18:7973,G15_MASK:21522,getBCHTypeInfo:function(a){for(var b=a<<10;f.getBCHDigit(b)-f.getBCHDigit(f.G15)>=0;)b^=f.G15<<f.getBCHDigit(b)-f.getBCHDigit(f.G15);return(a<<10|b)^f.G15_MASK},getBCHTypeNumber:function(a){for(var b=a<<12;f.getBCHDigit(b)-f.getBCHDigit(f.G18)>=0;)b^=f.G18<<f.getBCHDigit(b)-f.getBCHDigit(f.G18);return a<<12|b},getBCHDigit:function(a){for(var b=0;0!=a;)b++,a>>>=1;return b},getPatternPosition:function(a){return f.PATTERN_POSITION_TABLE[a-1]},getMask:function(a,b,c){switch(a){case e.PATTERN000:return 0==(b+c)%2;case e.PATTERN001:return 0==b%2;case e.PATTERN010:return 0==c%3;case e.PATTERN011:return 0==(b+c)%3;case e.PATTERN100:return 0==(Math.floor(b/2)+Math.floor(c/3))%2;case e.PATTERN101:return 0==b*c%2+b*c%3;case e.PATTERN110:return 0==(b*c%2+b*c%3)%2;case e.PATTERN111:return 0==(b*c%3+(b+c)%2)%2;default:throw new Error("bad maskPattern:"+a)}},getErrorCorrectPolynomial:function(a){for(var b=new i([1],0),c=0;a>c;c++)b=b.multiply(new i([1,g.gexp(c)],0));return b},getLengthInBits:function(a,b){if(b>=1&&10>b)switch(a){case c.MODE_NUMBER:return 10;case c.MODE_ALPHA_NUM:return 9;case c.MODE_8BIT_BYTE:return 8;case c.MODE_KANJI:return 8;default:throw new Error("mode:"+a)}else if(27>b)switch(a){case c.MODE_NUMBER:return 12;case c.MODE_ALPHA_NUM:return 11;case c.MODE_8BIT_BYTE:return 16;case c.MODE_KANJI:return 10;default:throw new Error("mode:"+a)}else{if(!(41>b))throw new Error("type:"+b);switch(a){case c.MODE_NUMBER:return 14;case c.MODE_ALPHA_NUM:return 13;case c.MODE_8BIT_BYTE:return 16;case c.MODE_KANJI:return 12;default:throw new Error("mode:"+a)}}},getLostPoint:function(a){for(var b=a.getModuleCount(),c=0,d=0;b>d;d++)for(var e=0;b>e;e++){for(var f=0,g=a.isDark(d,e),h=-1;1>=h;h++)if(!(0>d+h||d+h>=b))for(var i=-1;1>=i;i++)0>e+i||e+i>=b||(0!=h||0!=i)&&g==a.isDark(d+h,e+i)&&f++;f>5&&(c+=3+f-5)}for(var d=0;b-1>d;d++)for(var e=0;b-1>e;e++){var j=0;a.isDark(d,e)&&j++,a.isDark(d+1,e)&&j++,a.isDark(d,e+1)&&j++,a.isDark(d+1,e+1)&&j++,(0==j||4==j)&&(c+=3)}for(var d=0;b>d;d++)for(var e=0;b-6>e;e++)a.isDark(d,e)&&!a.isDark(d,e+1)&&a.isDark(d,e+2)&&a.isDark(d,e+3)&&a.isDark(d,e+4)&&!a.isDark(d,e+5)&&a.isDark(d,e+6)&&(c+=40);for(var e=0;b>e;e++)for(var d=0;b-6>d;d++)a.isDark(d,e)&&!a.isDark(d+1,e)&&a.isDark(d+2,e)&&a.isDark(d+3,e)&&a.isDark(d+4,e)&&!a.isDark(d+5,e)&&a.isDark(d+6,e)&&(c+=40);for(var k=0,e=0;b>e;e++)for(var d=0;b>d;d++)a.isDark(d,e)&&k++;var l=Math.abs(100*k/b/b-50)/5;return c+=10*l}},g={glog:function(a){if(1>a)throw new Error("glog("+a+")");return g.LOG_TABLE[a]},gexp:function(a){for(;0>a;)a+=255;for(;a>=256;)a-=255;return g.EXP_TABLE[a]},EXP_TABLE:new Array(256),LOG_TABLE:new Array(256)},h=0;8>h;h++)g.EXP_TABLE[h]=1<<h;for(var h=8;256>h;h++)g.EXP_TABLE[h]=g.EXP_TABLE[h-4]^g.EXP_TABLE[h-5]^g.EXP_TABLE[h-6]^g.EXP_TABLE[h-8];for(var h=0;255>h;h++)g.LOG_TABLE[g.EXP_TABLE[h]]=h;i.prototype={get:function(a){return this.num[a]},getLength:function(){return this.num.length},multiply:function(a){for(var b=new Array(this.getLength()+a.getLength()-1),c=0;c<this.getLength();c++)for(var d=0;d<a.getLength();d++)b[c+d]^=g.gexp(g.glog(this.get(c))+g.glog(a.get(d)));return new i(b,0)},mod:function(a){if(this.getLength()-a.getLength()<0)return this;for(var b=g.glog(this.get(0))-g.glog(a.get(0)),c=new Array(this.getLength()),d=0;d<this.getLength();d++)c[d]=this.get(d);for(var d=0;d<a.getLength();d++)c[d]^=g.gexp(g.glog(a.get(d))+b);return new i(c,0).mod(a)}},j.RS_BLOCK_TABLE=[[1,26,19],[1,26,16],[1,26,13],[1,26,9],[1,44,34],[1,44,28],[1,44,22],[1,44,16],[1,70,55],[1,70,44],[2,35,17],[2,35,13],[1,100,80],[2,50,32],[2,50,24],[4,25,9],[1,134,108],[2,67,43],[2,33,15,2,34,16],[2,33,11,2,34,12],[2,86,68],[4,43,27],[4,43,19],[4,43,15],[2,98,78],[4,49,31],[2,32,14,4,33,15],[4,39,13,1,40,14],[2,121,97],[2,60,38,2,61,39],[4,40,18,2,41,19],[4,40,14,2,41,15],[2,146,116],[3,58,36,2,59,37],[4,36,16,4,37,17],[4,36,12,4,37,13],[2,86,68,2,87,69],[4,69,43,1,70,44],[6,43,19,2,44,20],[6,43,15,2,44,16],[4,101,81],[1,80,50,4,81,51],[4,50,22,4,51,23],[3,36,12,8,37,13],[2,116,92,2,117,93],[6,58,36,2,59,37],[4,46,20,6,47,21],[7,42,14,4,43,15],[4,133,107],[8,59,37,1,60,38],[8,44,20,4,45,21],[12,33,11,4,34,12],[3,145,115,1,146,116],[4,64,40,5,65,41],[11,36,16,5,37,17],[11,36,12,5,37,13],[5,109,87,1,110,88],[5,65,41,5,66,42],[5,54,24,7,55,25],[11,36,12],[5,122,98,1,123,99],[7,73,45,3,74,46],[15,43,19,2,44,20],[3,45,15,13,46,16],[1,135,107,5,136,108],[10,74,46,1,75,47],[1,50,22,15,51,23],[2,42,14,17,43,15],[5,150,120,1,151,121],[9,69,43,4,70,44],[17,50,22,1,51,23],[2,42,14,19,43,15],[3,141,113,4,142,114],[3,70,44,11,71,45],[17,47,21,4,48,22],[9,39,13,16,40,14],[3,135,107,5,136,108],[3,67,41,13,68,42],[15,54,24,5,55,25],[15,43,15,10,44,16],[4,144,116,4,145,117],[17,68,42],[17,50,22,6,51,23],[19,46,16,6,47,17],[2,139,111,7,140,112],[17,74,46],[7,54,24,16,55,25],[34,37,13],[4,151,121,5,152,122],[4,75,47,14,76,48],[11,54,24,14,55,25],[16,45,15,14,46,16],[6,147,117,4,148,118],[6,73,45,14,74,46],[11,54,24,16,55,25],[30,46,16,2,47,17],[8,132,106,4,133,107],[8,75,47,13,76,48],[7,54,24,22,55,25],[22,45,15,13,46,16],[10,142,114,2,143,115],[19,74,46,4,75,47],[28,50,22,6,51,23],[33,46,16,4,47,17],[8,152,122,4,153,123],[22,73,45,3,74,46],[8,53,23,26,54,24],[12,45,15,28,46,16],[3,147,117,10,148,118],[3,73,45,23,74,46],[4,54,24,31,55,25],[11,45,15,31,46,16],[7,146,116,7,147,117],[21,73,45,7,74,46],[1,53,23,37,54,24],[19,45,15,26,46,16],[5,145,115,10,146,116],[19,75,47,10,76,48],[15,54,24,25,55,25],[23,45,15,25,46,16],[13,145,115,3,146,116],[2,74,46,29,75,47],[42,54,24,1,55,25],[23,45,15,28,46,16],[17,145,115],[10,74,46,23,75,47],[10,54,24,35,55,25],[19,45,15,35,46,16],[17,145,115,1,146,116],[14,74,46,21,75,47],[29,54,24,19,55,25],[11,45,15,46,46,16],[13,145,115,6,146,116],[14,74,46,23,75,47],[44,54,24,7,55,25],[59,46,16,1,47,17],[12,151,121,7,152,122],[12,75,47,26,76,48],[39,54,24,14,55,25],[22,45,15,41,46,16],[6,151,121,14,152,122],[6,75,47,34,76,48],[46,54,24,10,55,25],[2,45,15,64,46,16],[17,152,122,4,153,123],[29,74,46,14,75,47],[49,54,24,10,55,25],[24,45,15,46,46,16],[4,152,122,18,153,123],[13,74,46,32,75,47],[48,54,24,14,55,25],[42,45,15,32,46,16],[20,147,117,4,148,118],[40,75,47,7,76,48],[43,54,24,22,55,25],[10,45,15,67,46,16],[19,148,118,6,149,119],[18,75,47,31,76,48],[34,54,24,34,55,25],[20,45,15,61,46,16]],j.getRSBlocks=function(a,b){var c=j.getRsBlockTable(a,b);if(void 0==c)throw new Error("bad rs block @ typeNumber:"+a+"/errorCorrectLevel:"+b);for(var d=c.length/3,e=[],f=0;d>f;f++)for(var g=c[3*f+0],h=c[3*f+1],i=c[3*f+2],k=0;g>k;k++)e.push(new j(h,i));return e},j.getRsBlockTable=function(a,b){switch(b){case d.L:return j.RS_BLOCK_TABLE[4*(a-1)+0];case d.M:return j.RS_BLOCK_TABLE[4*(a-1)+1];case d.Q:return j.RS_BLOCK_TABLE[4*(a-1)+2];case d.H:return j.RS_BLOCK_TABLE[4*(a-1)+3];default:return void 0}},k.prototype={get:function(a){var b=Math.floor(a/8);return 1==(1&this.buffer[b]>>>7-a%8)},put:function(a,b){for(var c=0;b>c;c++)this.putBit(1==(1&a>>>b-c-1))},getLengthInBits:function(){return this.length},putBit:function(a){var b=Math.floor(this.length/8);this.buffer.length<=b&&this.buffer.push(0),a&&(this.buffer[b]|=128>>>this.length%8),this.length++}};var l=[[17,14,11,7],[32,26,20,14],[53,42,32,24],[78,62,46,34],[106,84,60,44],[134,106,74,58],[154,122,86,64],[192,152,108,84],[230,180,130,98],[271,213,151,119],[321,251,177,137],[367,287,203,155],[425,331,241,177],[458,362,258,194],[520,412,292,220],[586,450,322,250],[644,504,364,280],[718,560,394,310],[792,624,442,338],[858,666,482,382],[929,711,509,403],[1003,779,565,439],[1091,857,611,461],[1171,911,661,511],[1273,997,715,535],[1367,1059,751,593],[1465,1125,805,625],[1528,1190,868,658],[1628,1264,908,698],[1732,1370,982,742],[1840,1452,1030,790],[1952,1538,1112,842],[2068,1628,1168,898],[2188,1722,1228,958],[2303,1809,1283,983],[2431,1911,1351,1051],[2563,1989,1423,1093],[2699,2099,1499,1139],[2809,2213,1579,1219],[2953,2331,1663,1273]],o=function(){var a=function(a,b){this._el=a,this._htOption=b};return a.prototype.draw=function(a){function g(a,b){var c=document.createElementNS("http://www.w3.org/2000/svg",a);for(var d in b)b.hasOwnProperty(d)&&c.setAttribute(d,b[d]);return c}var b=this._htOption,c=this._el,d=a.getModuleCount();Math.floor(b.width/d),Math.floor(b.height/d),this.clear();var h=g("svg",{viewBox:"0 0 "+String(d)+" "+String(d),width:"100%",height:"100%",fill:b.colorLight});h.setAttributeNS("http://www.w3.org/2000/xmlns/","xmlns:xlink","http://www.w3.org/1999/xlink"),c.appendChild(h),h.appendChild(g("rect",{fill:b.colorDark,width:"1",height:"1",id:"template"}));for(var i=0;d>i;i++)for(var j=0;d>j;j++)if(a.isDark(i,j)){var k=g("use",{x:String(i),y:String(j)});k.setAttributeNS("http://www.w3.org/1999/xlink","href","#template"),h.appendChild(k)}},a.prototype.clear=function(){for(;this._el.hasChildNodes();)this._el.removeChild(this._el.lastChild)},a}(),p="svg"===document.documentElement.tagName.toLowerCase(),q=p?o:m()?function(){function a(){this._elImage.src=this._elCanvas.toDataURL("image/png"),this._elImage.style.display="block",this._elCanvas.style.display="none"}function d(a,b){var c=this;if(c._fFail=b,c._fSuccess=a,null===c._bSupportDataURI){var d=document.createElement("img"),e=function(){c._bSupportDataURI=!1,c._fFail&&_fFail.call(c)},f=function(){c._bSupportDataURI=!0,c._fSuccess&&c._fSuccess.call(c)};return d.onabort=e,d.onerror=e,d.onload=f,d.src="data:image/gif;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAFCAYAAACNbyblAAAAHElEQVQI12P4//8/w38GIAXDIBKE0DHxgljNBAAO9TXL0Y4OHwAAAABJRU5ErkJggg==",void 0}c._bSupportDataURI===!0&&c._fSuccess?c._fSuccess.call(c):c._bSupportDataURI===!1&&c._fFail&&c._fFail.call(c)}if(this._android&&this._android<=2.1){var b=1/window.devicePixelRatio,c=CanvasRenderingContext2D.prototype.drawImage;CanvasRenderingContext2D.prototype.drawImage=function(a,d,e,f,g,h,i,j){if("nodeName"in a&&/img/i.test(a.nodeName))for(var l=arguments.length-1;l>=1;l--)arguments[l]=arguments[l]*b;else"undefined"==typeof j&&(arguments[1]*=b,arguments[2]*=b,arguments[3]*=b,arguments[4]*=b);c.apply(this,arguments)}}var e=function(a,b){this._bIsPainted=!1,this._android=n(),this._htOption=b,this._elCanvas=document.createElement("canvas"),this._elCanvas.width=b.width,this._elCanvas.height=b.height,a.appendChild(this._elCanvas),this._el=a,this._oContext=this._elCanvas.getContext("2d"),this._bIsPainted=!1,this._elImage=document.createElement("img"),this._elImage.style.display="none",this._el.appendChild(this._elImage),this._bSupportDataURI=null};return e.prototype.draw=function(a){var b=this._elImage,c=this._oContext,d=this._htOption,e=a.getModuleCount(),f=d.width/e,g=d.height/e,h=Math.round(f),i=Math.round(g);b.style.display="none",this.clear();for(var j=0;e>j;j++)for(var k=0;e>k;k++){var l=a.isDark(j,k),m=k*f,n=j*g;c.strokeStyle=l?d.colorDark:d.colorLight,c.lineWidth=1,c.fillStyle=l?d.colorDark:d.colorLight,c.fillRect(m,n,f,g),c.strokeRect(Math.floor(m)+.5,Math.floor(n)+.5,h,i),c.strokeRect(Math.ceil(m)-.5,Math.ceil(n)-.5,h,i)}this._bIsPainted=!0},e.prototype.makeImage=function(){this._bIsPainted&&d.call(this,a)},e.prototype.isPainted=function(){return this._bIsPainted},e.prototype.clear=function(){this._oContext.clearRect(0,0,this._elCanvas.width,this._elCanvas.height),this._bIsPainted=!1},e.prototype.round=function(a){return a?Math.floor(1e3*a)/1e3:a},e}():function(){var a=function(a,b){this._el=a,this._htOption=b};return a.prototype.draw=function(a){for(var b=this._htOption,c=this._el,d=a.getModuleCount(),e=Math.floor(b.width/d),f=Math.floor(b.height/d),g=['<table style="border:0;border-collapse:collapse;">'],h=0;d>h;h++){g.push("<tr>");for(var i=0;d>i;i++)g.push('<td style="border:0;border-collapse:collapse;padding:0;margin:0;width:'+e+"px;height:"+f+"px;background-color:"+(a.isDark(h,i)?b.colorDark:b.colorLight)+';"></td>');g.push("</tr>")}g.push("</table>"),c.innerHTML=g.join("");var j=c.childNodes[0],k=(b.width-j.offsetWidth)/2,l=(b.height-j.offsetHeight)/2;k>0&&l>0&&(j.style.margin=l+"px "+k+"px")},a.prototype.clear=function(){this._el.innerHTML=""},a}();QRCode=function(a,b){if(this._htOption={width:256,height:256,typeNumber:4,colorDark:"#000000",colorLight:"#ffffff",correctLevel:d.H},"string"==typeof b&&(b={text:b}),b)for(var c in b)this._htOption[c]=b[c];"string"==typeof a&&(a=document.getElementById(a)),this._android=n(),this._el=a,this._oQRCode=null,this._oDrawing=new q(this._el,this._htOption),this._htOption.text&&this.makeCode(this._htOption.text)},QRCode.prototype.makeCode=function(a){this._oQRCode=new b(r(a,this._htOption.correctLevel),this._htOption.correctLevel),this._oQRCode.addData(a),this._oQRCode.make(),this._el.title=a,this._oDrawing.draw(this._oQRCode),this.makeImage()},QRCode.prototype.makeImage=function(){"function"==typeof this._oDrawing.makeImage&&(!this._android||this._android>=3)&&this._oDrawing.makeImage()},QRCode.prototype.clear=function(){this._oDrawing.clear()},QRCode.CorrectLevel=d}();
+    const SCALE_TEMPLATES = {
+        agreement5: {
+            name: 'Agreement (5-point)',
+            points: 5,
+            labels: ['Strongly Agree', 'Agree', 'Neutral', 'Disagree', 'Strongly Disagree']
+        },
+        frequency5: {
+            name: 'Frequency (5-point)',
+            points: 5,
+            labels: ['Always', 'Often', 'Sometimes', 'Rarely', 'Never']
+        },
+        importance5: {
+            name: 'Importance (5-point)',
+            points: 5,
+            labels: ['Very Important', 'Important', 'Moderately Important', 'Slightly Important', 'Not Important']
+        },
+        agreement4: {
+            name: 'Forced Agreement (4-point)',
+            points: 4,
+            labels: ['Strongly Agree', 'Agree', 'Disagree', 'Strongly Disagree']
+        },
+        simple3: {
+            name: 'Simple (3-point)',
+            points: 3,
+            labels: ['Yes', 'To some extent', 'No']
+        }
+    };
+
+    let activeFilters = {
+        gender: '',
+        age: '',
+        education: '',
+        sector: ''
+    };
+
+    let state = {
+        surveyId: '',
+        projectTitle: '',
+        organization: '',
+        location: '',
+        surveyObjective: '',
+        enumeratorInstructions: '',
+        sectors: [],
+        sections: [],
+        enumeratorLink: ''
+    };
+
+    let countMode = 'count';
+
+    // === PHASE 4: Multi-Survey State Extension ===
+    let migrationComplete = false;
+
+    function initializeMultiSurveyState() {
+        if (!state.surveys) {
+            state.surveys = [];
+        }
+        
+        if (!state.activeSurveyId) {
+            state.activeSurveyId = null;
+        }
+    }
+
+    function migrateLegacyData() {
+        if (migrationComplete) return;
+        
+        if (state.sections && state.sections.length > 0 && (!state.surveys || state.surveys.length === 0)) {
+            const legacySurveyId = state.surveyId || generateSurveyId();
+            
+            state.surveys = [{
+                surveyId: legacySurveyId,
+                title: state.projectTitle || 'Default Survey',
+                description: 'Migrated from legacy format',
+                sections: state.sections,
+                status: 'draft'
+            }];
+            
+            state.activeSurveyId = legacySurveyId;
+            
+            console.log('✅ Migrated legacy survey data to multi-survey format');
+        }
+        
+        if (!state.surveys || state.surveys.length === 0) {
+            state.surveys = [];
+            state.activeSurveyId = null;
+        }
+        
+        migrationComplete = true;
+        saveState();
+    }
+
+    function getActiveSurvey() {
+        if (!state.activeSurveyId || !state.surveys) return null;
+        return state.surveys.find(s => s.surveyId === state.activeSurveyId);
+    }
+
+    function getActiveSections() {
+        const activeSurvey = getActiveSurvey();
+        return activeSurvey ? activeSurvey.sections : [];
+    }
+
+    function getScaleDefinition(question) {
+        if (!question.scale) {
+            return null;
+        }
+
+        if (typeof question.scale === 'object' && question.scale.labels) {
+            return question.scale;
+        }
+
+        const points = parseInt(question.scale);
+        if (points === 5) {
+            return { ...SCALE_TEMPLATES.agreement5, type: 'agreement5' };
+        } else if (points === 4) {
+            return { ...SCALE_TEMPLATES.agreement4, type: 'agreement4' };
+        } else if (points === 3) {
+            return { ...SCALE_TEMPLATES.simple3, type: 'simple3' };
+        }
+
+        return {
+            points: points,
+            type: 'custom',
+            labels: Array.from({ length: points }, (_, i) => `Option ${i + 1}`)
+        };
+    }
+
+    function normalizeQuestionScale(question) {
+        if (question.type === 'scale' && typeof question.scale === 'number') {
+            const scaleDef = getScaleDefinition(question);
+            if (scaleDef) {
+                question.scale = {
+                    points: scaleDef.points,
+                    type: scaleDef.type || 'agreement5',
+                    labels: scaleDef.labels
+                };
+            }
+        }
+    }
+
+    function generateSurveyId() {
+        const timestamp = Date.now();
+        const random = Math.random().toString(36).substring(2, 6).toUpperCase();
+        return `LM-${new Date().getFullYear()}-${random}`;
+    }
+
+    const questionLibrary = {
+        employer: [
+            { text: "What is the total number of employees in your organization?", type: "text", source: "ILO" },
+            { text: "How many vacancies do you currently have?", type: "text", source: "ILO" },
+            { text: "What are the main challenges in recruiting qualified workers?", type: "text", source: "WB" },
+            { text: "Do you provide on-the-job training for employees?", type: "yesno", source: "ILO" },
+            { text: "How would you rate the availability of skilled workers in your sector?", type: "scale", scale: { points: 5, type: 'agreement5', labels: SCALE_TEMPLATES.agreement5.labels }, source: "EU" },
+            { text: "What percentage of your workforce has formal technical qualifications?", type: "text", source: "WB" },
+            { text: "Do you collaborate with educational institutions for workforce development?", type: "yesno", source: "UNESCO" },
+            { text: "How important are digital skills for your business operations?", type: "scale", scale: { points: 5, type: 'importance5', labels: SCALE_TEMPLATES.importance5.labels }, source: "EU" },
+            { text: "What is your average employee turnover rate?", type: "text", source: "ILO" },
+            { text: "Do you anticipate expanding your workforce in the next 12 months?", type: "yesno", source: "WB" }
+        ],
+        skills: [
+            { text: "What technical skills are most needed in your organization?", type: "text", source: "UNESCO" },
+            { text: "How adequate is the current TVET system in meeting your skill requirements?", type: "scale", scale: { points: 5, type: 'agreement5', labels: SCALE_TEMPLATES.agreement5.labels }, source: "UNESCO" },
+            { text: "Do you provide apprenticeship or internship programs?", type: "yesno", source: "ILO" },
+            { text: "What soft skills do you consider most important for employees?", type: "text", source: "WB" },
+            { text: "How frequently do you update employee training programs?", type: "text", source: "EU" },
+            { text: "Do you face difficulties in finding workers with adequate digital literacy?", type: "yesno", source: "EU" },
+            { text: "How would you rate the quality of graduates from local training institutions?", type: "scale", scale: { points: 5, type: 'agreement5', labels: SCALE_TEMPLATES.agreement5.labels }, source: "UNESCO" },
+            { text: "What emerging skills will be critical for your sector in the next 5 years?", type: "text", source: "WB" },
+            { text: "Do you invest in upskilling or reskilling existing employees?", type: "yesno", source: "ILO" },
+            { text: "How important is continuous professional development in your organization?", type: "scale", scale: { points: 5, type: 'importance5', labels: SCALE_TEMPLATES.importance5.labels }, source: "EU" }
+        ],
+        market: [
+            { text: "What are the main growth areas in your sector?", type: "text", source: "WB" },
+            { text: "How do you anticipate technology will impact your workforce needs?", type: "text", source: "EU" },
+            { text: "Do you track labor market trends for strategic planning?", type: "yesno", source: "ILO" },
+            { text: "How would you rate the current labor market conditions in your sector?", type: "scale", scale: { points: 5, type: 'agreement5', labels: SCALE_TEMPLATES.agreement5.labels }, source: "WB" },
+            { text: "What occupations do you expect to see increased demand for?", type: "text", source: "UNESCO" },
+            { text: "Are there occupations in your sector that are becoming obsolete?", type: "text", source: "EU" },
+            { text: "How important is regional labor mobility for your workforce planning?", type: "scale", scale: { points: 5, type: 'importance5', labels: SCALE_TEMPLATES.importance5.labels }, source: "ILO" },
+            { text: "Do you use labor market information systems for decision-making?", type: "yesno", source: "WB" },
+            { text: "What external factors most affect your hiring decisions?", type: "text", source: "EU" },
+            { text: "How prepared is your organization for future skills disruptions?", type: "scale", scale: { points: 5, type: 'agreement5', labels: SCALE_TEMPLATES.agreement5.labels }, source: "UNESCO" }
+        ]
+    };
+
+    document.addEventListener('DOMContentLoaded', function() {
+        loadState();
+        setupEventListeners();
+        loadQuestionLibrary();
+        renderSectors();
+        renderSections();
+        loadResponses();
+        updateSurveyIdDisplay();
+        renderSurveysList();
+        openAdminDB().then(() => {
+            refreshImportedData();
+            syncFromServer();   // pull latest from server on every load
+        });
+    });
+
+    function setupEventListeners() {
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const tabName = this.getAttribute('data-tab');
+                switchTab(tabName);
+            });
+        });
+
+        const surveyIdInput = document.getElementById('survey-id');
+        surveyIdInput.addEventListener('input', function(e) {
+            if (!state.surveyId) {
+                state.surveyId = e.target.value.trim();
+                saveState();
+                updateSurveyIdDisplay();
+            }
+        });
+
+        document.getElementById('project-title').addEventListener('input', function(e) {
+            state.projectTitle = e.target.value;
+            saveState();
+        });
+
+        document.getElementById('organization').addEventListener('input', function(e) {
+            state.organization = e.target.value;
+            saveState();
+        });
+
+        document.getElementById('location').addEventListener('input', function(e) {
+            state.location = e.target.value;
+            saveState();
+        });
+
+        document.getElementById('survey-objective').addEventListener('input', function(e) {
+            state.surveyObjective = e.target.value;
+            saveState();
+        });
+
+        document.getElementById('enumerator-instructions').addEventListener('input', function(e) {
+            state.enumeratorInstructions = e.target.value;
+            saveState();
+        });
+    }
+
+    function updateSurveyIdDisplay() {
+        const display = document.getElementById('survey-id-display');
+        if (state.surveyId) {
+            display.innerHTML = `<div class="survey-id-badge">Survey ID: ${state.surveyId}</div>`;
+            const input = document.getElementById('survey-id');
+            if (input) {
+                input.value = state.surveyId;
+                input.disabled = true;
+            }
+        } else {
+            display.innerHTML = '';
+        }
+    }
+
+    function switchTab(tabName) {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(tc => tc.classList.remove('active'));
+        
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        document.getElementById(tabName).classList.add('active');
+
+        if (tabName === 'dashboard') {
+            syncThenRefresh();
+        }
+
+        if (tabName === 'survey-forms') {
+            renderSurveysList();
+        }
+    }
+
+    function saveState() {
+        if (!state.surveyId) {
+            state.surveyId = generateSurveyId();
+            updateSurveyIdDisplay();
+        }
+        localStorage.setItem('lms_admin_state', JSON.stringify(state));
+    }
+
+    function loadState() {
+        const saved = localStorage.getItem('lms_admin_state');
+        if (saved) {
+            state = JSON.parse(saved);
+            if (!state.surveyId) {
+                state.surveyId = generateSurveyId();
+                saveState();
+            }
+            state.sections.forEach(section => {
+                section.questions.forEach(normalizeQuestionScale);
+            });
+            populateFields();
+        }
+        
+        initializeMultiSurveyState();
+        migrateLegacyData();
+        
+        if (state.surveys) {
+            state.surveys.forEach(survey => {
+                if (survey.sections) {
+                    survey.sections.forEach(section => {
+                        section.questions.forEach(normalizeQuestionScale);
+                    });
+                }
+            });
+        }
+    }
+
+    function populateFields() {
+        document.getElementById('survey-id').value = state.surveyId || '';
+        document.getElementById('project-title').value = state.projectTitle || '';
+        document.getElementById('organization').value = state.organization || '';
+        document.getElementById('location').value = state.location || '';
+        document.getElementById('survey-objective').value = state.surveyObjective || '';
+        document.getElementById('enumerator-instructions').value = state.enumeratorInstructions || '';
+    }
+
+    function resetState() {
+        state = {
+            surveyId: '',
+            projectTitle: '',
+            organization: '',
+            location: '',
+            surveyObjective: '',
+            enumeratorInstructions: '',
+            sectors: [],
+            sections: [],
+            enumeratorLink: ''
+        };
+    }
+
+    function renderAll() {
+        populateFields();
+        renderSectors();
+        renderSections();
+        updateSurveyIdDisplay();
+        renderSurveysList();
+    }
+
+    function clearAllData() {
+        if (!confirm('⚠️ This will delete ALL data including project info, sectors, sections, and responses. This cannot be undone. Continue?')) {
+            return;
+        }
+
+        localStorage.removeItem('lms_admin_state');
+        if (state.surveyId) {
+            const surveyKey = 'lms_responses_' + state.surveyId;
+            localStorage.removeItem(surveyKey);
+        }
+
+        if (state.surveys) {
+            state.surveys.forEach(survey => {
+                localStorage.removeItem('lms_responses_' + survey.surveyId);
+            });
+        }
+
+        localStorage.removeItem('lms_responses');
+
+        resetState();
+        renderAll();
+
+        document.getElementById('enumerator-link').textContent = 'Link will appear here after generation';
+
+        alert('✅ All data has been cleared');
+    }
+
+    function saveWork() {
+        const workData = {
+            surveyId: state.surveyId,
+            projectTitle: state.projectTitle,
+            organization: state.organization,
+            location: state.location,
+            surveyObjective: state.surveyObjective,
+            enumeratorInstructions: state.enumeratorInstructions,
+            sectors: state.sectors,
+            sections: state.sections,
+            surveys: state.surveys,
+            activeSurveyId: state.activeSurveyId
+        };
+
+        const date = new Date();
+        const dateStr = date.getFullYear() + 
+                      String(date.getMonth() + 1).padStart(2, '0') + 
+                      String(date.getDate()).padStart(2, '0');
+        
+        const dataStr = JSON.stringify(workData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `labour-market-survey-work-${dateStr}.json`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+    }
+
+    function triggerLoadWork() {
+        document.getElementById('load-work-file').click();
+    }
+
+    function loadWork(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const loadedData = JSON.parse(e.target.result);
+                
+                if (!loadedData.hasOwnProperty('projectTitle')) {
+                    alert('❌ Invalid file format');
+                    return;
+                }
+
+                state.surveyId = loadedData.surveyId || generateSurveyId();
+                state.projectTitle = loadedData.projectTitle || '';
+                state.organization = loadedData.organization || '';
+                state.location = loadedData.location || '';
+                state.surveyObjective = loadedData.surveyObjective || '';
+                state.enumeratorInstructions = loadedData.enumeratorInstructions || '';
+                state.sectors = loadedData.sectors || [];
+                state.sections = loadedData.sections || [];
+                state.surveys = loadedData.surveys || [];
+                state.activeSurveyId = loadedData.activeSurveyId || null;
+
+                state.sections.forEach(section => {
+                    section.questions.forEach(normalizeQuestionScale);
+                });
+
+                if (state.surveys) {
+                    state.surveys.forEach(survey => {
+                        if (survey.sections) {
+                            survey.sections.forEach(section => {
+                                section.questions.forEach(normalizeQuestionScale);
+                            });
+                        }
+                    });
+                }
+
+                saveState();
+                renderAll();
+                loadResponses();
+
+                alert('✅ Work loaded successfully');
+            } catch (err) {
+                alert('❌ Error loading file: ' + err.message);
+            }
+        };
+        reader.readAsText(file);
+        
+        event.target.value = '';
+    }
+
+    function clearTabContent(tabName) {
+        let message = '';
+        let action = null;
+
+        switch(tabName) {
+            case 'project-setup':
+                message = '⚠️ Clear all project setup fields?';
+                action = () => {
+                    state.projectTitle = '';
+                    state.organization = '';
+                    state.location = '';
+                    state.surveyObjective = '';
+                    state.enumeratorInstructions = '';
+                    populateFields();
+                };
+                break;
+
+            case 'sectors':
+                message = '⚠️ Clear all sectors?';
+                action = () => {
+                    state.sectors = [];
+                    renderSectors();
+                };
+                break;
+
+            case 'survey-structure':
+                message = '⚠️ Clear all sections and questions?';
+                action = () => {
+                    const activeSurvey = getActiveSurvey();
+                    if (activeSurvey) {
+                        activeSurvey.sections = [];
+                    } else {
+                        state.sections = [];
+                    }
+                    renderSections();
+                };
+                break;
+
+            case 'dashboard':
+                message = '⚠️ Clear all survey responses and enumerator link? This cannot be undone.';
+                action = () => {
+                    clearResponses();
+                    state.enumeratorLink = '';
+                    document.getElementById('enumerator-link').textContent = 'Link will appear here after generation';
+                };
+                break;
+        }
+
+        if (!action) return;
+
+        if (confirm(message)) {
+            action();
+            saveState();
+        }
+    }
+
+    function clearResponses() {
+        const activeSurvey = getActiveSurvey();
+        if (activeSurvey) {
+            const surveyKey = 'lms_responses_' + activeSurvey.surveyId;
+            localStorage.removeItem(surveyKey);
+        } else {
+            const surveyKey = 'lms_responses_' + state.surveyId;
+            localStorage.removeItem(surveyKey);
+        }
+        localStorage.removeItem('lms_responses');
+        loadResponses();
+    }
+
+    async function exportFullSurveyToExcel() {
+        const workbook = new ExcelJS.Workbook();
+
+        const projectSheet = workbook.addWorksheet('Project Info');
+        projectSheet.columns = [
+            { header: 'Field', key: 'field', width: 30 },
+            { header: 'Value', key: 'value', width: 60 }
+        ];
+        projectSheet.addRow({ field: 'Survey ID', value: state.surveyId });
+        projectSheet.addRow({ field: 'Project Title', value: state.projectTitle });
+        projectSheet.addRow({ field: 'Organization', value: state.organization });
+        projectSheet.addRow({ field: 'Location', value: state.location });
+        projectSheet.addRow({ field: 'Survey Objective', value: state.surveyObjective });
+        projectSheet.addRow({ field: 'Enumerator Instructions', value: state.enumeratorInstructions });
+        projectSheet.getRow(1).font = { bold: true };
+        projectSheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF667eea' }
+        };
+        projectSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        const sectorsSheet = workbook.addWorksheet('Sectors');
+        sectorsSheet.columns = [
+            { header: 'Sector', key: 'sector', width: 40 }
+        ];
+        state.sectors.forEach(sector => {
+            sectorsSheet.addRow({ sector: sector });
+        });
+        sectorsSheet.getRow(1).font = { bold: true };
+        sectorsSheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF667eea' }
+        };
+        sectorsSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        const activeSurvey = getActiveSurvey();
+        const sections = activeSurvey ? activeSurvey.sections : state.sections;
+
+        const structureSheet = workbook.addWorksheet('Survey Structure');
+        structureSheet.columns = [
+            { header: 'Section', key: 'section', width: 30 },
+            { header: 'Section Instructions', key: 'instructions', width: 40 },
+            { header: 'Question', key: 'question', width: 60 },
+            { header: 'Type', key: 'type', width: 15 },
+            { header: 'Scale', key: 'scale', width: 10 },
+            { header: 'Scale Labels', key: 'scaleLabels', width: 50 },
+            { header: 'Required', key: 'required', width: 12 }
+        ];
+        sections.forEach(section => {
+            section.questions.forEach(q => {
+                const scaleDef = getScaleDefinition(q);
+                structureSheet.addRow({
+                    section: section.title,
+                    instructions: section.instructions,
+                    question: q.text,
+                    type: q.type,
+                    scale: q.type === 'scale' && scaleDef ? scaleDef.points : '',
+                    scaleLabels: q.type === 'scale' && scaleDef ? scaleDef.labels.join(' | ') : '',
+                    required: q.required ? 'Yes' : 'No'
+                });
+            });
+        });
+        structureSheet.getRow(1).font = { bold: true };
+        structureSheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF667eea' }
+        };
+        structureSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        const surveyKey = activeSurvey ? ('lms_responses_' + activeSurvey.surveyId) : ('lms_responses_' + state.surveyId);
+        let allResponses = JSON.parse(localStorage.getItem(surveyKey) || '[]');
+
+        if (allResponses.length === 0) {
+            allResponses = JSON.parse(localStorage.getItem('lms_responses') || '[]');
+        }
+
+        const responses = filterResponses(allResponses, activeFilters);
+
+        const responsesSheet = workbook.addWorksheet('Responses');
+        
+        if (responses.length > 0) {
+            const allQuestions = new Set();
+            responses.forEach(response => {
+                Object.keys(response.answers).forEach(q => allQuestions.add(q));
+            });
+            const questionArray = Array.from(allQu);
+responsesSheet.columns = [
+                { header: 'Response #', key: 'id', width: 15 },
+                { header: 'Timestamp', key: 'timestamp', width: 25 },
+                { header: 'Age', key: 'age', width: 15 },
+                { header: 'Gender', key: 'gender', width: 15 },
+                { header: 'Education', key: 'education', width: 20 },
+                ...questionArray.map(q => ({ header: q, key: q, width: 30 }))
+            ];
+
+            responses.forEach((response, index) => {
+                const row = {
+                    id: index + 1,
+                    timestamp: new Date(response.timestamp).toLocaleString(),
+                    age: (response.meta && response.meta.age) || '',
+                    gender: (response.meta && response.meta.gender) || '',
+                    education: (response.meta && response.meta.education) || ''
+                };
+                
+                questionArray.forEach(q => {
+                    row[q] = response.answers[q] || '';
+                });
+                
+                responsesSheet.addRow(row);
+            });
+
+            responsesSheet.getRow(1).font = { bold: true };
+            responsesSheet.getRow(1).fill = {
+                type: 'pattern',
+                pattern: 'solid',
+                fgColor: { argb: 'FF667eea' }
+            };
+            responsesSheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        } else {
+            responsesSheet.addRow({ message: 'No responses available' });
+        }
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `full-survey-export-${Date.now()}.xlsx`;
+        link.click();
+        
+        URL.revokeObjectURL(url);
+    }
+
+    function addPredefinedSector() {
+        const select = document.getElementById('sector-select');
+        const sector = select.value;
+        
+        if (!sector) {
+            alert('Please select a sector');
+            return;
+        }
+
+        if (state.sectors.includes(sector)) {
+            alert('Sector already added');
+            return;
+        }
+
+        state.sectors.push(sector);
+        saveState();
+        renderSectors();
+        select.value = '';
+    }
+
+    function addCustomSector() {
+        const input = document.getElementById('custom-sector');
+        const sector = input.value.trim();
+        
+        if (!sector) {
+            alert('Please enter a sector name');
+            return;
+        }
+
+        if (state.sectors.includes(sector)) {
+            alert('Sector already added');
+            return;
+        }
+
+        state.sectors.push(sector);
+        saveState();
+        renderSectors();
+        input.value = '';
+    }
+
+    function deleteSector(index) {
+        if (confirm('Delete this sector?')) {
+            state.sectors.splice(index, 1);
+            saveState();
+            renderSectors();
+        }
+    }
+
+    function renderSectors() {
+        const container = document.getElementById('sector-list');
+        
+        if (state.sectors.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No sectors added yet</p></div>';
+            return;
+        }
+
+        container.innerHTML = state.sectors.map((sector, index) => `
+            <div class="sector-tag">
+                ${sector}
+                <button onclick="deleteSector(${index})" title="Delete">×</button>
+            </div>
+        `).join('');
+    }
+
+    function loadQuestionLibrary() {
+        const category = document.getElementById('library-category').value;
+        const container = document.getElementById('library-questions');
+        const questions = questionLibrary[category];
+
+        container.innerHTML = questions.map((q, index) => {
+            const scaleDef = getScaleDefinition(q);
+            return `
+                <div class="question-item">
+                    <div class="question-header">
+                        <input type="checkbox" class="question-checkbox" data-category="${category}" data-index="${index}">
+                        <div class="question-content">
+                            <div class="question-text">${q.text}</div>
+                            <div class="question-meta">
+                                <span class="source-badge">${q.source}</span>
+                                <select class="question-type-select" data-category="${category}" data-index="${index}">
+                                    <option value="text" ${q.type === 'text' ? 'selected' : ''}>Text</option>
+                                    <option value="yesno" ${q.type === 'yesno' ? 'selected' : ''}>Yes / No</option>
+                                    <option value="scale" ${q.type === 'scale' ? 'selected' : ''}>Scale</option>
+                                </select>
+                            </div>
+                            ${q.type === 'scale' ? `
+                                <div class="scale-template-selector" id="scale-template-${category}-${index}">
+                                    <label style="font-size: 0.85rem; margin-bottom: 0.25rem;">Scale Template:</label>
+                                    <select class="scale-template-select" data-category="${category}" data-index="${index}" onchange="updateLibraryScaleTemplate('${category}', ${index}, this.value)">
+                                        ${Object.keys(SCALE_TEMPLATES).map(key => `
+                                            <option value="${key}" ${scaleDef && scaleDef.type === key ? 'selected' : ''}>
+                                                ${SCALE_TEMPLATES[key].name}
+                                            </option>
+                                        `).join('')}
+                                        <option value="custom" ${scaleDef && scaleDef.type === 'custom' ? 'selected' : ''}>Custom</option>
+                                    </select>
+                                    ${scaleDef ? `
+                                        <div class="scale-preview">
+                                            ${scaleDef.labels.map((label, i) => `${i + 1}. ${label}`).join(' • ')}
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            ` : `<div id="scale-template-${category}-${index}" style="display:none;"></div>`}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        document.querySelectorAll('.question-type-select').forEach(select => {
+            select.addEventListener('change', function() {
+                const category = this.dataset.category;
+                const index = this.dataset.index;
+                const templateDiv = document.getElementById(`scale-template-${category}-${index}`);
+                
+                if (this.value === 'scale') {
+                    templateDiv.style.display = 'block';
+                    if (!questionLibrary[category][index].scale || typeof questionLibrary[category][index].scale === 'number') {
+                        questionLibrary[category][index].scale = {
+                            points: 5,
+                            type: 'agreement5',
+                            labels: SCALE_TEMPLATES.agreement5.labels
+                        };
+                    }
+                    loadQuestionLibrary();
+                } else {
+                    templateDiv.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    function updateLibraryScaleTemplate(category, index, templateKey) {
+        const question = questionLibrary[category][index];
+        
+        if (templateKey === 'custom') {
+            question.scale = {
+                points: 5,
+                type: 'custom',
+                labels: ['Option 1', 'Option 2', 'Option 3', 'Option 4', 'Option 5']
+            };
+        } else {
+            const template = SCALE_TEMPLATES[templateKey];
+            question.scale = {
+                points: template.points,
+                type: templateKey,
+                labels: [...template.labels]
+            };
+        }
+        
+        loadQuestionLibrary();
+    }
+
+    function addSelectedQuestions() {
+        const checkboxes = document.querySelectorAll('.question-checkbox:checked');
+        
+        if (checkboxes.length === 0) {
+            alert('Please select at least one question');
+            return;
+        }
+
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) {
+            alert('⚠️ Please select an active survey first');
+            return;
+        }
+
+        if (activeSurvey.sections.length === 0) {
+            activeSurvey.sections.push({
+                title: 'Section 1',
+                instructions: '',
+                questions: []
+            });
+        }
+
+        const targetSection = activeSurvey.sections[activeSurvey.sections.length - 1];
+
+        checkboxes.forEach(checkbox => {
+            const category = checkbox.dataset.category;
+            const index = parseInt(checkbox.dataset.index);
+            const libQuestion = questionLibrary[category][index];
+            
+            const typeSelect = document.querySelector(`.question-type-select[data-category="${category}"][data-index="${index}"]`);
+            const type = typeSelect.value;
+
+            const isDuplicate = targetSection.questions.some(q => q.text === libQuestion.text);
+            
+            if (!isDuplicate) {
+                const newQuestion = {
+                    text: libQuestion.text,
+                    type: type,
+                    required: false
+                };
+
+                if (type === 'scale') {
+                    const scaleDef = getScaleDefinition(libQuestion);
+                    if (scaleDef) {
+                        newQuestion.scale = {
+                            points: scaleDef.points,
+                            type: scaleDef.type,
+                            labels: [...scaleDef.labels]
+                        };
+                    } else {
+                        newQuestion.scale = {
+                            points: 5,
+                            type: 'agreement5',
+                            labels: [...SCALE_TEMPLATES.agreement5.labels]
+                        };
+                    }
+                }
+
+                targetSection.questions.push(newQuestion);
+            }
+
+            checkbox.checked = false;
+        });
+
+        saveState();
+        alert(`${checkboxes.length} question(s) added to survey structure`);
+        renderSections();
+    }
+
+    function addSection() {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) {
+            alert('⚠️ Please select an active survey first');
+            return;
+        }
+        
+        const sectionNum = activeSurvey.sections.length + 1;
+        activeSurvey.sections.push({
+            title: `Section ${sectionNum}`,
+            instructions: '',
+            questions: []
+        });
+        saveState();
+        renderSections();
+    }
+
+    function deleteSection(index) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        
+        if (confirm('Delete this section and all its questions?')) {
+            activeSurvey.sections.splice(index, 1);
+            saveState();
+            renderSections();
+        }
+    }
+
+    function updateSectionTitle(index, value) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        activeSurvey.sections[index].title = value;
+        saveState();
+    }
+
+    function updateSectionInstructions(index, value) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        activeSurvey.sections[index].instructions = value;
+        saveState();
+    }
+
+    function addQuestionToSection(sectionIndex) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        
+        activeSurvey.sections[sectionIndex].questions.push({
+            text: 'New question',
+            type: 'text',
+            required: false
+        });
+        saveState();
+        renderSections();
+    }
+
+    function deleteQuestion(sectionIndex, questionIndex) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        
+        if (confirm('Delete this question?')) {
+            activeSurvey.sections[sectionIndex].questions.splice(questionIndex, 1);
+            saveState();
+            renderSections();
+        }
+    }
+
+    function updateQuestionText(sectionIndex, questionIndex, value) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        activeSurvey.sections[sectionIndex].questions[questionIndex].text = value;
+        saveState();
+    }
+
+    function updateQuestionType(sectionIndex, questionIndex, value) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        
+        const question = activeSurvey.sections[sectionIndex].questions[questionIndex];
+        question.type = value;
+        
+        if (value === 'scale' && !question.scale) {
+            question.scale = {
+                points: 5,
+                type: 'agreement5',
+                labels: [...SCALE_TEMPLATES.agreement5.labels]
+            };
+        }
+        
+        saveState();
+        renderSections();
+    }
+
+    function updateQuestionRequired(sectionIndex, questionIndex, checked) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+        activeSurvey.sections[sectionIndex].questions[questionIndex].required = checked;
+        saveState();
+    }
+
+    function editScaleLabels(sectionIndex, questionIndex) {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) return;
+
+        const question = activeSurvey.sections[sectionIndex].questions[questionIndex];
+        const scaleDef = getScaleDefinition(question);
+        
+        if (!scaleDef) return;
+
+        const modal = document.createElement('div');
+        modal.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000;';
+        
+        const content = document.createElement('div');
+        content.style.cssText = 'background: white; padding: 2rem; border-radius: 8px; max-width: 600px; width: 90%; max-height: 80vh; overflow-y: auto;';
+        
+        content.innerHTML = `
+            <h3 style="margin-bottom: 1rem;">Edit Scale Labels</h3>
+            <div class="form-group">
+                <label>Scale Template:</label>
+                <select id="edit-scale-template" style="margin-bottom: 1rem;">
+                    ${Object.keys(SCALE_TEMPLATES).map(key => `
+                        <option value="${key}" ${scaleDef.type === key ? 'selected' : ''}>
+                            ${SCALE_TEMPLATES[key].name}
+                        </option>
+                    `).join('')}
+                    <option value="custom" ${scaleDef.type === 'custom' ? 'selected' : ''}>Custom</option>
+                </select>
+            </div>
+            <div id="scale-labels-container">
+                ${scaleDef.labels.map((label, i) => `
+                    <div class="scale-label-input">
+                        <span class="scale-label-number">${i + 1}.</span>
+                        <input type="text" value="${label}" data-index="${i}" class="scale-label-field">
+                    </div>
+                `).join('')}
+            </div>
+            <div style="margin-top: 1.5rem; display: flex; gap: 0.5rem; justify-content: flex-end;">
+                <button class="btn btn-secondary" onclick="this.closest('div[style*=fixed]').remove()">Cancel</button>
+                <button class="btn btn-primary" id="save-scale-labels">Save</button>
+            </div>
+        `;
+        
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+
+        document.getElementById('edit-scale-template').addEventListener('change', function() {
+            const templateKey = this.value;
+            const container = document.getElementById('scale-labels-container');
+            
+            if (templateKey === 'custom') {
+                container.innerHTML = scaleDef.labels.map((label, i) => `
+                    <div class="scale-label-input">
+                        <span class="scale-label-number">${i + 1}.</span>
+                        <input type="text" value="${label}" data-index="${i}" class="scale-label-field">
+                    </div>
+                `).join('');
+            } else {
+                const template = SCALE_TEMPLATES[templateKey];
+                container.innerHTML = template.labels.map((label, i) => `
+                    <div class="scale-label-input">
+                        <span class="scale-label-number">${i + 1}.</span>
+                        <input type="text" value="${label}" data-index="${i}" class="scale-label-field">
+                    </div>
+                `).join('');
+            }
+        });
+
+        document.getElementById('save-scale-labels').addEventListener('click', function() {
+            const templateKey = document.getElementById('edit-scale-template').value;
+            const labels = Array.from(document.querySelectorAll('.scale-label-field')).map(input => input.value);
+            
+            question.scale = {
+                points: labels.length,
+                type: templateKey,
+                labels: labels
+            };
+            
+            saveState();
+            renderSections();
+            modal.remove();
+        });
+
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    function renderSections() {
+        const container = document.getElementById('sections-container');
+        
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No active survey selected. Go to "Survey Forms" tab to create or select a survey.</p></div>';
+            return;
+        }
+        
+        const sections = activeSurvey.sections;
+        
+        if (sections.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📄</div><p>No sections yet. Click "Add Section" to start building your survey.</p></div>';
+            return;
+        }
+
+        container.innerHTML = sections.map((section, sIndex) => `
+            <div class="section-card">
+                <div class="section-header">
+                    <input type="text" value="${section.title}" 
+                           onchange="updateSectionTitle(${sIndex}, this.value)"
+                           style="font-size: 1.2rem; font-weight: 600; border: 1px solid #ddd; padding: 0.5rem; border-radius: 4px; flex: 1;">
+                    <button class="btn btn-danger btn-small" onclick="deleteSection(${sIndex})">🗑 Delete Section</button>
+                </div>
+                <div class="form-group">
+                    <label>Section Instructions</label>
+                    <textarea onchange="updateSectionInstructions(${sIndex}, this.value)">${section.instructions}</textarea>
+                </div>
+                <button class="btn btn-success btn-small" onclick="addQuestionToSection(${sIndex})">➕ Add Question</button>
+                <div class="section-questions">
+                    ${section.questions.length === 0 ? '<p style="color: #6c757d; margin-top: 1rem;">No questions in this section</p>' : ''}
+                    ${section.questions.map((q, qIndex) => {
+                        const scaleDef = getScaleDefinition(q);
+                        return `
+                            <div class="survey-question">
+                                <input type="text" value="${q.text}" 
+                                       onchange="updateQuestionText(${sIndex}, ${qIndex}, this.value)"
+                                       style="width: 100%; margin-bottom: 0.75rem; font-weight: 500;">
+                                <div class="question-controls">
+                                    <select onchange="updateQuestionType(${sIndex}, ${qIndex}, this.value)">
+                                        <option value="text" ${q.type === 'text' ? 'selected' : ''}>Text</option>
+                                        <option value="yesno" ${q.type === 'yesno' ? 'selected' : ''}>Yes / No</option>
+                                        <option value="scale" ${q.type === 'scale' ? 'selected' : ''}>Scale</option>
+                                    </select>
+                                    ${q.type === 'scale' && scaleDef ? `
+                                        <button class="btn btn-warning btn-small" onclick="editScaleLabels(${sIndex}, ${qIndex})">
+                                            ✏️ Edit Scale Labels (${scaleDef.points}-point)
+                                        </button>
+                                        <div class="scale-preview">
+                                            ${scaleDef.labels.map((label, i) => `${i + 1}. ${label}`).join(' • ')}
+                                        </div>
+                                    ` : ''}
+                                    <label class="inline-flex">
+                                        <input type="checkbox" ${q.required ? 'checked' : ''}
+                                               onchange="updateQuestionRequired(${sIndex}, ${qIndex}, this.checked)">
+                                        Required
+                                    </label>
+                                    <button class="btn btn-danger btn-small" onclick="deleteQuestion(${sIndex}, ${qIndex})">🗑</button>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `).join('');
+    }
+
+    async function generateEnumeratorLink() {
+        const activeSurvey = getActiveSurvey();
+        if (!activeSurvey) {
+            alert('⚠️ No active survey selected');
+            return;
+        }
+        
+        const surveyData = {
+            surveyId: activeSurvey.surveyId,
+            surveyTitle: activeSurvey.title,
+            projectTitle: state.projectTitle,
+            organization: state.organization,
+            location: state.location,
+            surveyObjective: state.surveyObjective,
+            enumeratorInstructions: state.enumeratorInstructions,
+            sectors: state.sectors,
+            sections: activeSurvey.sections
+        };
+
+        // Build full LZ-compressed link
+        const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(surveyData));
+        const fullLink   = `${location.origin}${location.pathname.replace('admin.html', '')}enumerator.html#lz:${compressed}`;
+
+        const el = document.getElementById('enumerator-link');
+
+        // Try to shorten via backend
+        try {
+            const res  = await fetch(`${BACKEND_URL}/api/shorten`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ url: fullLink })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                state.enumeratorLink = data.shortUrl;
+                saveState();
+                if (el) el.textContent = data.shortUrl;
+                return;
+            }
+        } catch(e) { /* backend unreachable — fall back to full link */ }
+
+        // Fallback: use full link
+        state.enumeratorLink = fullLink;
+        saveState();
+        if (el) el.textContent = fullLink;
+    }
+
+    function copyEnumeratorLink() {
+        if (!state.enumeratorLink) {
+            alert('Please generate a link first');
+            return;
+        }
+
+        navigator.clipboard.writeText(state.enumeratorLink).then(() => {
+            alert('Link copied to clipboard!');
+        }).catch(() => {
+            const temp = document.createElement('textarea');
+            temp.value = state.enumeratorLink;
+            document.body.appendChild(temp);
+            temp.select();
+            document.execCommand('copy');
+            document.body.removeChild(temp);
+            alert('Link copied to clipboard!');
+        });
+    }
+
+    function openEnumeratorLink() {
+        if (!state.enumeratorLink) {
+            alert('Please generate a link first');
+            return;
+        }
+
+        window.open(state.enumeratorLink, '_blank');
+    }
+
+    function showQRModal() {
+        if (!state.enumeratorLink) {
+            alert('Please generate a link first');
+            return;
+        }
+        const container = document.getElementById('qr-canvas-container');
+        container.innerHTML = '';
+        new QRCode(container, {
+            text: state.enumeratorLink,
+            width: 360,
+            height: 360,
+            correctLevel: QRCode.CorrectLevel.M
+        });
+        document.getElementById('qr-modal-overlay').classList.add('active');
+    }
+
+    function closeQRModal() {
+        document.getElementById('qr-modal-overlay').classList.remove('active');
+    }
+
+    function getQRCanvas() {
+        const container = document.getElementById('qr-canvas-container');
+        const canvas = container.querySelector('canvas');
+        const img = container.querySelector('img');
+
+        return new Promise((resolve) => {
+            if (canvas) {
+                // Draw QR on a new canvas with white padding
+                const pad = 20;
+                const out = document.createElement('canvas');
+                out.width = canvas.width + pad * 2;
+                out.height = canvas.height + pad * 2;
+                const ctx = out.getContext('2d');
+                ctx.fillStyle = '#ffffff';
+                ctx.fillRect(0, 0, out.width, out.height);
+                ctx.drawImage(canvas, pad, pad);
+                resolve(out);
+            } else if (img) {
+                const image = new Image();
+                image.onload = () => {
+                    const pad = 20;
+                    const out = document.createElement('canvas');
+                    out.width = image.naturalWidth + pad * 2;
+                    out.height = image.naturalHeight + pad * 2;
+                    const ctx = out.getContext('2d');
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(0, 0, out.width, out.height);
+                    ctx.drawImage(image, pad, pad);
+                    resolve(out);
+                };
+                image.src = img.src;
+            } else {
+                resolve(null);
+            }
+        });
+    }
+
+    async function copyQRImage() {
+        try {
+            const canvas = await getQRCanvas();
+            if (!canvas) { alert('QR code not ready yet'); return; }
+            canvas.toBlob(async (blob) => {
+                try {
+                    await navigator.clipboard.write([
+                        new ClipboardItem({ 'image/png': blob })
+                    ]);
+                    alert('✅ QR image copied to clipboard! You can now paste it in any application.');
+                } catch (e) {
+                    alert('⚠️ Could not copy image to clipboard. Please use "Download PNG" instead.');
+                }
+            }, 'image/png');
+        } catch (e) {
+            alert('⚠️ Could not copy image to clipboard. Please use "Download PNG" instead.');
+        }
+    }
+
+    async function downloadQR() {
+        const canvas = await getQRCanvas();
+        if (!canvas) { alert('QR code not ready yet'); return; }
+        const a = document.createElement('a');
+        a.download = 'enumerator-qr.png';
+        a.href = canvas.toDataURL('image/png');
+        a.click();
+    }
+
+    function filterResponses(responses, filters) {
+        if (!responses || responses.length === 0) {
+            return [];
+        }
+
+        return responses.filter(response => {
+            const meta = response.meta || {};
+
+            if (filters.gender && filters.gender !== '') {
+                if (!meta.gender || meta.gender !== filters.gender) {
+                    return false;
+                }
+            }
+
+            if (filters.age && filters.age !== '') {
+                if (!meta.age || meta.age !== filters.age) {
+                    return false;
+                }
+            }
+
+            if (filters.education && filters.education !== '') {
+                if (!meta.education || meta.education !== filters.education) {
+                    return false;
+                }
+            }
+
+            if (filters.sector && filters.sector !== '') {
+                if (!meta.sector || meta.sector !== filters.sector) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    }
+
+    function buildCrosstab(responses, rowKey, colKey) {
+        const table = {};
+        const rowTotals = {};
+        const colTotals = {};
+        let grandTotal = 0;
+
+        responses.forEach(r => {
+            const rowVal = rowKey.startsWith('meta.')
+                ? (r.meta?.[rowKey.replace('meta.', '')] ?? 'N/A')
+                : (r.answers?.[rowKey] ?? 'N/A');
+
+            const colVal = colKey.startsWith('meta.')
+                ? (r.meta?.[colKey.replace('meta.', '')] ?? 'N/A')
+                : (r.answers?.[colKey] ?? 'N/A');
+
+            table[rowVal] ??= {};
+            table[rowVal][colVal] = (table[rowVal][colVal] || 0) + 1;
+
+            rowTotals[rowVal] = (rowTotals[rowVal] || 0) + 1;
+            colTotals[colVal] = (colTotals[colVal] || 0) + 1;
+            grandTotal++;
+        });
+
+        return {
+            table,
+            rowTotals,
+            colTotals,
+            grandTotal,
+            rows: Object.keys(rowTotals),
+            cols: Object.keys(colTotals)
+        };
+    }
+
+    function renderCrosstabTable(result) {
+        if (!result || result.grandTotal === 0) {
+            return '<div class="no-data-message">No data for selected variables</div>';
+        }
+
+        const { table, rows, cols, rowTotals, colTotals, grandTotal } = result;
+
+        let html = '<table style="width: 100%; border-collapse: collapse; font-size: 0.9rem;">';
+        
+        html += '<thead><tr style="background: #667eea; color: white;">';
+        html += '<th style="padding: 0.75rem; text-align: left; border: 1px solid #ddd;"></th>';
+        cols.forEach(c => html += `<th style="padding: 0.75rem; text-align: center; border: 1px solid #ddd;">${c}</th>`);
+        html += '<th style="padding: 0.75rem; text-align: center; border: 1px solid #ddd; background: #5568d3;">Total</th></tr></thead>';
+
+        html += '<tbody>';
+        rows.forEach((r, idx) => {
+            const bgColor = idx % 2 === 0 ? '#f8f9fa' : 'white';
+            html += `<tr style="background: ${bgColor};">`;
+            html += `<td style="padding: 0.75rem; font-weight: 600; border: 1px solid #ddd;">${r}</td>`;
+            
+            cols.forEach(c => {
+                const v = table[r]?.[c] || 0;
+                html += `<td style="padding: 0.75rem; text-align: center; border: 1px solid #ddd;">${v}</td>`;
+            });
+            
+            html += `<td style="padding: 0.75rem; text-align: center; border: 1px solid #ddd; background: #e7f3ff; font-weight: 600;">${rowTotals[r]}</td></tr>`;
+        });
+
+        html += '<tr style="background: #e7f3ff; font-weight: 600;">';
+        html += '<td style="padding: 0.75rem; border: 1px solid #ddd;">Total</td>';
+        cols.forEach(c => html += `<td style="padding: 0.75rem; text-align: center; border: 1px solid #ddd;">${colTotals[c]}</td>`);
+        html += `<td style="padding: 0.75rem; text-align: center; border: 1px solid #ddd; background: #667eea; color: white;">${grandTotal}</td></tr>`;
+        html += '</tbody></table>';
+
+        return html;
+    }
+
+    function applyFilters() {
+        activeFilters.gender = document.getElementById('filter-gender').value;
+        activeFilters.age = document.getElementById('filter-age').value;
+        activeFilters.education = document.getElementById('filter-education').value;
+        activeFilters.sector = document.getElementById('filter-sector').value;
+
+        updateFilterStatus();
+        loadResponses();
+        applyImportedFilters();
+    }
+
+    function updateFilterStatus() {
+        const statusEl = document.getElementById('filter-status');
+        if (!statusEl) return;
+
+        const activeFiltersList = [];
+
+        if (activeFilters.gender) {
+            activeFiltersList.push(`Gender = ${activeFilters.gender}`);
+        }
+        if (activeFilters.age) {
+            activeFiltersList.push(`Age = ${activeFilters.age}`);
+        }
+        if (activeFilters.education) {
+            activeFiltersList.push(`Education = ${activeFilters.education}`);
+        }
+        if (activeFilters.sector) {
+            activeFiltersList.push(`Sector = ${activeFilters.sector}`);
+        }
+        const enumFilter = document.getElementById('filter-enumerator');
+        if (enumFilter && enumFilter.value) {
+            activeFiltersList.push(`Enumerator = ${enumFilter.value}`);
+        }
+        const surveyFilter = document.getElementById('filter-survey-type');
+        if (surveyFilter && surveyFilter.value) {
+            activeFiltersList.push(`Survey = ${surveyFilter.value}`);
+        }
+
+        statusEl.innerHTML = activeFiltersList.length
+            ? `<strong>Showing:</strong> ${activeFiltersList.join(', ')}`
+            : `<strong>Showing:</strong> All responses`;
+    }
+
+    function populateEducationFilter(responses) {
+        const educationSelect = document.getElementById('filter-education');
+        if (!educationSelect) return;
+
+        const educationLevels = new Set();
+        responses.forEach(response => {
+            if (response.meta && response.meta.education && response.meta.education.trim()) {
+                educationLevels.add(response.meta.education.trim());
+            }
+        });
+
+        const currentValue = educationSelect.value;
+        educationSelect.innerHTML = '<option value="">All</option>';
+        
+        Array.from(educationLevels).sort().forEach(level => {
+            const option = document.createElement('option');
+            option.value = level;
+            option.textContent = level;
+            educationSelect.appendChild(option);
+        });
+
+        if (currentValue && educationLevels.has(currentValue)) {
+            educationSelect.value = currentValue;
+        }
+    }
+
+    /* ── Unified data source: merges localStorage + IDB imported responses ──
+       Both share the same {meta, answers} shape so all downstream functions
+       (filterResponses, renderCharts, buildCrosstab) work without modification.
+    ─────────────────────────────────────────────────────────────────────────── */
+    async function getMergedResponses() {
+        // 1. Local survey-builder responses from localStorage
+        const activeSurvey = getActiveSurvey();
+        let localResponses = [];
+        if (activeSurvey) {
+            const surveyKey = 'lms_responses_' + activeSurvey.surveyId;
+            localResponses = JSON.parse(localStorage.getItem(surveyKey) || '[]');
+            if (localResponses.length === 0) {
+                localResponses = JSON.parse(localStorage.getItem('lms_responses') || '[]');
+            }
+        }
+
+        // 2. Imported enumerator responses from IndexedDB
+        let idbResponses = [];
+        if (_adminDB) {
+            try {
+                // Respect the survey type filter if one is selected
+                const surveyTypeEl = document.getElementById('filter-survey-type');
+                const surveyFilter = surveyTypeEl ? surveyTypeEl.value : '';
+
+                const docs = await idbGetAllRespondents(surveyFilter, '');
+                // Normalise IDB doc → {meta, answers, timestamp} shape
+                idbResponses = docs.map(doc => ({
+                    _idb:      true,
+                    meta:      doc.meta      || {},
+                    answers:   doc.answers   || {},
+                    timestamp: doc.startTime || doc.endTime || '',
+                    completed: doc.completed || false
+                }));
+            } catch(e) { /* IDB unavailable — continue with local only */ }
+        }
+
+        // 3. Merge: local first, then IDB (dedup is not critical here —
+        //    local builder responses won't share records with imported ones)
+        return [...localResponses, ...idbResponses];
+    }
+
+    async function loadResponses() {
+        const allResponses = await getMergedResponses();
+        const responses    = filterResponses(allResponses, activeFilters);
+
+        const totalEl = document.getElementById('total-responses');
+        if (totalEl) totalEl.textContent = responses.length;
+
+        populateEducationFilter(allResponses);
+
+        if (responses.length === 0) {
+            const chartsEl = document.getElementById('charts-container');
+            const countsEl = document.getElementById('response-counts');
+            if (chartsEl) chartsEl.innerHTML =
+                '<div class="no-data-message">No responses match the selected filters</div>';
+            if (countsEl) countsEl.innerHTML = '';
+            return;
+        }
+
+        renderCharts(responses);
+        renderResponseCounts(responses);
+    }
+
+    async function updateCrosstab() {
+        const rowSelect = document.getElementById('crosstab-row-select');
+        const colSelect = document.getElementById('crosstab-col-select');
+        const container = document.getElementById('crosstab-container');
+        if (!rowSelect || !colSelect || !container) return;
+
+        const rowKey = rowSelect.value;
+        const colKey = colSelect.value;
+
+        if (!rowKey || !colKey) {
+            container.innerHTML = '<div class="info-banner">Select row and column variables</div>';
+            return;
+        }
+        if (rowKey === colKey) {
+            container.innerHTML = '<div class="info-banner">Row and column must be different</div>';
+            return;
+        }
+
+        const allResponses = await getMergedResponses();
+        const responses    = filterResponses(allResponses, activeFilters);
+        const result       = buildCrosstab(responses, rowKey, colKey);
+        container.innerHTML = renderCrosstabTable(result);
+    }
+
+    function setCountMode(mode) {
+        countMode = mode;
+        loadResponses();
+    }
+
+    function renderResponseCounts(responses) {
+        const container = document.getElementById('response-counts');
+        if (!container) return;
+
+        if (!responses || responses.length === 0) {
+            container.innerHTML = '<div class="no-data-message">No data</div>';
+            return;
+        }
+
+        const counts = {};
+        responses.forEach(r => {
+            Object.entries(r.answers || {}).forEach(([q, v]) => {
+                if (!counts[q]) counts[q] = {};
+                counts[q][v] = (counts[q][v] || 0) + 1;
+            });
+        });
+
+        const total = responses.length;
+
+        let html = '';
+        Object.entries(counts).forEach(([question, values]) => {
+            html += `<div class="count-card">
+                       <div class="count-title">${question}</div>`;
+            Object.entries(values).forEach(([value, c]) => {
+                const display = countMode === 'percent'
+                    ? `${((c / total) * 100).toFixed(1)}%`
+                    : c;
+                html += `<div class="count-row">
+                           <span>${value}</span>
+                           <strong>${display}</strong>
+                         </div>`;
+            });
+            html += `</div>`;
+        });
+
+        container.innerHTML = html;
+    }
+
+    function renderCharts(responses) {
+        const container = document.getElementById('charts-container');
+        if (!container) return;
+
+        if (!responses || responses.length === 0) {
+            if (activeFilters.gender || activeFilters.age || activeFilters.education) {
+                container.innerHTML = '<div class="no-data-message">No data available for selected filters</div>';
+            } else {
+                container.innerHTML = '<div class="empty-state"><p>No data available for charts</p></div>';
+            }
+            return;
+        }
+
+        const counts = {};
+        responses.forEach(response => {
+            Object.entries(response.answers || {}).forEach(([question, answer]) => {
+                if (!counts[question]) counts[question] = {};
+                const key = String(answer);
+                if (!counts[question][key]) counts[question][key] = 0;
+                counts[question][key]++;
+            });
+        });
+
+        const chartableQuestions = Object.entries(counts).filter(([question, answers]) => {
+            const keys = Object.keys(answers);
+            return keys.length >= 2 && keys.length <= 10 && keys.some(k => k.length < 60);
+        });
+
+        if (chartableQuestions.length === 0) {
+            container.innerHTML = '<div class="empty-state"><p>No suitable data for visualization</p></div>';
+            return;
+        }
+
+        let html = '';
+
+        chartableQuestions.forEach(([question, answers]) => {
+            const total = Object.values(answers).reduce((sum, val) => sum + val, 0);
+            const sortedAnswers = Object.entries(answers).sort((a, b) => b[1] - a[1]);
+
+            const isLikert = sortedAnswers.some(([ans]) => 
+                ans.includes('Agree') || ans.includes('Disagree') || 
+                ans.includes('Important') || ans.includes('Never') || 
+                ans.includes('Always')
+            );
+
+            if (isLikert && sortedAnswers.length >= 3) {
+                html += renderDivergingChart(question, sortedAnswers, total);
+            } else {
+                html += renderBarChart(question, sortedAnswers, total);
+            }
+        });
+
+        container.innerHTML = html;
+    }
+
+    function renderBarChart(question, sortedAnswers, total) {
+        return `
+            <div class="chart-container">
+                <div class="chart-title">${question}</div>
+                <div class="bar-chart">
+                    ${sortedAnswers.map(([answer, count]) => {
+                        const percentage = ((count / total) * 100).toFixed(1);
+                        return `
+                            <div class="bar-row">
+                                <div class="bar-label">${answer}</div>
+                                <div class="bar-track">
+                                    <div class="bar-fill" style="width: ${percentage}%">
+                                        ${percentage}%
+                                    </div>
+                                </div>
+                                <div class="bar-value">${count}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function renderDivergingChart(question, sortedAnswers, total) {
+        const positive = sortedAnswers.filter(([ans]) => 
+            ans.includes('Agree') || ans.includes('Important') || 
+            ans.includes('Always') || ans.includes('Often') || ans.toLowerCase() === 'yes'
+        );
+        const negative = sortedAnswers.filter(([ans]) => 
+            ans.includes('Disagree') || ans.includes('Not Important') || 
+            ans.includes('Never') || ans.includes('Rarely') || ans.toLowerCase() === 'no'
+        );
+
+        if (positive.length === 0 || negative.length === 0) {
+            return renderBarChart(question, sortedAnswers, total);
+        }
+
+        const posTotal = positive.reduce((sum, [, count]) => sum + count, 0);
+        const negTotal = negative.reduce((sum, [, count]) => sum + count, 0);
+        const maxSide = Math.max(posTotal, negTotal);
+
+        return `
+            <div class="chart-container">
+                <div class="chart-title">${question}</div>
+                <div class="diverging-chart">
+                    ${sortedAnswers.map(([answer, count]) => {
+                        const isPos = positive.some(([ans]) => ans === answer);
+                        const isNeg = negative.some(([ans]) => ans === answer);
+                        
+                        if (!isPos && !isNeg) return '';
+
+                        const percentage = ((count / total) * 100).toFixed(1);
+                        const barWidth = ((count / maxSide) * 50).toFixed(1);
+
+                        return `
+                            <div class="diverging-row">
+                                <div class="diverging-label">${answer}</div>
+                                <div class="diverging-bars">
+                                    ${isNeg ? `
+                                        <div class="diverging-left" style="width: ${barWidth}%">
+                                            ${percentage}%
+                                        </div>
+                                        <div style="flex: 1;"></div>
+                                    ` : ''}
+                                    ${isPos ? `
+                                        <div style="flex: 1;"></div>
+                                        <div class="diverging-right" style="width: ${barWidth}%">
+                                            ${percentage}%
+                                        </div>
+                                    ` : ''}
+                                    <div class="diverging-center"></div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    function exportSurveyDefinition() {
+        const activeSurvey = getActiveSurvey();
+        const surveyData = activeSurvey ? {
+            surveyId: activeSurvey.surveyId,
+            surveyTitle: activeSurvey.title,
+            projectTitle: state.projectTitle,
+            organization: state.organization,
+            location: state.location,
+            surveyObjective: state.surveyObjective,
+            enumeratorInstructions: state.enumeratorInstructions,
+            sectors: state.sectors,
+            sections: activeSurvey.sections
+        } : {
+            surveyId: state.surveyId,
+            projectTitle: state.projectTitle,
+            organization: state.organization,
+            location: state.location,
+            surveyObjective: state.surveyObjective,
+            enumeratorInstructions: state.enumeratorInstructions,
+            sectors: state.sectors,
+            sections: state.sections
+        };
+
+        const dataStr = JSON.stringify(surveyData, null, 2);
+        const dataBlob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(dataBlob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `survey-definition-${Date.now()}.json`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+    async function exportResponsesToExcel() {
+        const allResponses = await getMergedResponses();
+        const responses    = filterResponses(allResponses, activeFilters);
+
+        if (responses.length === 0) {
+            alert('No responses to export');
+            return;
+        }
+
+        const workbook = new ExcelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Responses');
+
+        const allQuestions = new Set();
+        responses.forEach(response => {
+            Object.keys(response.answers || {}).forEach(q => allQuestions.add(q));
+        });
+
+        const questionArray = Array.from(allQuestions);
+
+        worksheet.columns = [
+            { header: 'Response #', key: 'id', width: 15 },
+            { header: 'Timestamp', key: 'timestamp', width: 25 },
+            { header: 'Age', key: 'age', width: 15 },
+            { header: 'Gender', key: 'gender', width: 15 },
+            { header: 'Education', key: 'education', width: 20 },
+            ...questionArray.map(q => ({ header: q, key: q, width: 30 }))
+        ];
+
+        responses.forEach((response, index) => {
+            const row = {
+                id: index + 1,
+                timestamp: new Date(response.timestamp).toLocaleString(),
+                age: (response.meta && response.meta.age) || '',
+                gender: (response.meta && response.meta.gender) || '',
+                education: (response.meta && response.meta.education) || ''
+            };
+
+            questionArray.forEach(q => {
+                row[q] = (response.answers && response.answers[q]) ? response.answers[q] : '';
+            });
+
+            worksheet.addRow(row);
+        });
+
+        worksheet.getRow(1).font = { bold: true };
+        worksheet.getRow(1).fill = {
+            type: 'pattern',
+            pattern: 'solid',
+            fgColor: { argb: 'FF667eea' }
+        };
+        worksheet.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+
+        const buffer = await workbook.xlsx.writeBuffer();
+        const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url = URL.createObjectURL(blob);
+
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `survey-responses-${Date.now()}.xlsx`;
+        link.click();
+
+        URL.revokeObjectURL(url);
+    }
+
+    // === PHASE 4: Survey Forms Management ===
+    function createNewSurvey() {
+        const title = prompt('Enter survey title:', 'New Survey');
+        if (!title) return;
+        
+        const description = prompt('Enter survey description (optional):', '');
+        
+        const newSurveyId = generateSurveyId();
+        
+        const newSurvey = {
+            surveyId: newSurveyId,
+            title: title.trim(),
+            description: description ? description.trim() : '',
+            sections: [],
+            status: 'draft'
+        };
+        
+        state.surveys.push(newSurvey);
+        state.activeSurveyId = newSurveyId;
+        
+        saveState();
+        renderSurveysList();
+        renderSections();
+        
+        alert(`✅ Survey "${title}" created and activated`);
+    }
+
+    function duplicateSurvey(surveyId) {
+        const survey = state.surveys.find(s => s.surveyId === surveyId);
+        if (!survey) return;
+        
+        const newTitle = prompt('Enter title for duplicated survey:', survey.title + ' (Copy)');
+        if (!newTitle) return;
+        
+        const newSurveyId = generateSurveyId();
+        
+        const duplicated = {
+            surveyId: newSurveyId,
+            title: newTitle.trim(),
+            description: survey.description,
+            sections: JSON.parse(JSON.stringify(survey.sections)),
+            status: 'draft'
+        };
+        
+        state.surveys.push(duplicated);
+        
+        saveState();
+        renderSurveysList();
+        
+        alert(`✅ Survey duplicated as "${newTitle}"`);
+    }
+
+    function renameSurvey(surveyId) {
+        const survey = state.surveys.find(s => s.surveyId === surveyId);
+        if (!survey) return;
+        
+        const newTitle = prompt('Enter new survey title:', survey.title);
+        if (!newTitle) return;
+        
+        survey.title = newTitle.trim();
+        
+        saveState();
+        renderSurveysList();
+    }
+
+    function deleteSurvey(surveyId) {
+        const survey = state.surveys.find(s => s.surveyId === surveyId);
+        if (!survey) return;
+        
+        if (!confirm(`⚠️ Delete survey "${survey.title}"? This will also delete all associated responses. This cannot be undone.`)) {
+            return;
+        }
+        
+        state.surveys = state.surveys.filter(s => s.surveyId !== surveyId);
+        
+        localStorage.removeItem('lms_responses_' + surveyId);
+        
+        if (state.activeSurveyId === surveyId) {
+            state.activeSurveyId = state.surveys.length > 0 ? state.surveys[0].surveyId : null;
+        }
+        
+        saveState();
+        renderSurveysList();
+        renderSections();
+        loadResponses();
+        
+        alert('✅ Survey deleted');
+    }
+
+    function setActiveSurvey(surveyId) {
+        state.activeSurveyId = surveyId;
+        saveState();
+        renderSurveysList();
+        renderSections();
+        loadResponses();
+    }
+
+    function toggleSurveyStatus(surveyId) {
+        const survey = state.surveys.find(s => s.surveyId === surveyId);
+        if (!survey) return;
+        
+        if (survey.status === 'draft') {
+            if (confirm(`Publish survey "${survey.title}"? This will lock the structure from editing.`)) {
+                survey.status = 'published';
+            }
+        } else if (survey.status === 'published') {
+            if (confirm(`Close survey "${survey.title}"? This will stop accepting new responses.`)) {
+                survey.status = 'closed';
+            }
+        } else if (survey.status === 'closed') {
+            if (confirm(`Reopen survey "${survey.title}"?`)) {
+                survey.status = 'published';
+            }
+        }
+        
+        saveState();
+        renderSurveysList();
+    }
+
+    function renderSurveysList() {
+        const container = document.getElementById('surveys-list-container');
+        if (!container) return;
+        
+        if (!state.surveys || state.surveys.length === 0) {
+            container.innerHTML = '<div class="empty-state"><div class="empty-state-icon">📋</div><p>No surveys yet. Click "Create New Survey" to start.</p></div>';
+            return;
+        }
+        
+        container.innerHTML = state.surveys.map(survey => {
+            const isActive = survey.surveyId === state.activeSurveyId;
+            const responsesKey = 'lms_responses_' + survey.surveyId;
+            const responses = JSON.parse(localStorage.getItem(responsesKey) || '[]');
+            const responseCount = responses.length;
+            const questionCount = survey.sections.reduce((sum, sec) => sum + sec.questions.length, 0);
+            
+            return `
+                <div class="survey-card ${isActive ? 'active' : ''}">
+                    <div class="survey-card-header">
+                        <div class="survey-card-title">
+                            <h3>${survey.title}</h3>
+                            <div class="survey-card-description">${survey.description || 'No description'}</div>
+                            <div class="survey-card-meta">
+                                <span class="survey-id-display">${survey.surveyId}</span>
+                                <span class="survey-status-badge ${survey.status}">${survey.status}</span>
+                                <span>📝 ${questionCount} questions</span>
+                                <span>📊 ${responseCount} responses</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="survey-card-actions">
+                        ${!isActive ? `
+                            <button class="btn btn-primary btn-small" onclick="setActiveSurvey('${survey.surveyId}')">
+                                ✓ Set Active
+                            </button>
+                        ` : `
+                            <span class="survey-status-badge" style="background: #667eea; color: white;">ACTIVE</span>
+                        `}
+                        
+                        <button class="btn btn-secondary btn-small" onclick="duplicateSurvey('${survey.surveyId}')">
+                            📋 Duplicate
+                        </button>
+                        
+                        <button class="btn btn-warning btn-small" onclick="renameSurvey('${survey.surveyId}')">
+                            ✏️ Rename
+                        </button>
+                        
+                        <button class="btn btn-${survey.status === 'draft' ? 'success' : survey.status === 'published' ? 'warning' : 'success'} btn-small" 
+                                onclick="toggleSurveyStatus('${survey.surveyId}')">
+                            ${survey.status === 'draft' ? '📤 Publish' : survey.status === 'published' ? '🔒 Close' : '🔓 Reopen'}
+                        </button>
+                        
+                        <button class="btn btn-danger btn-small" onclick="deleteSurvey('${survey.surveyId}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    /* ════════════════════════════════════════════════════
+       ADMIN INDEXEDDB LAYER
+    ════════════════════════════════════════════════════ */
+    const ADMIN_IDB_NAME    = 'LMS_Admin_IDB';
+    const ADMIN_IDB_VERSION = 1;
+    let _adminDB = null;
+
+    function openAdminDB() {
+        return new Promise((resolve, reject) => {
+            const req = indexedDB.open(ADMIN_IDB_NAME, ADMIN_IDB_VERSION);
+            req.onupgradeneeded = (e) => {
+                const db = e.target.result;
+                if (!db.objectStoreNames.contains('respondents')) {
+                    const store = db.createObjectStore('respondents', { keyPath: '_pk' });
+                    store.createIndex('by_survey',     'surveyId',     { unique: false });
+                    store.createIndex('by_enumerator', 'enumeratorId', { unique: false });
+                }
+                if (!db.objectStoreNames.contains('survey_registry')) {
+                    db.createObjectStore('survey_registry', { keyPath: 'surveyId' });
+                }
+            };
+            req.onsuccess  = (e) => { _adminDB = e.target.result; resolve(_adminDB); };
+            req.onerror    = (e) => reject(e.target.error);
+        });
+    }
+
+    function idbPutRespondent(doc) {
+        return new Promise((resolve, reject) => {
+            if (!_adminDB) { resolve(); return; }
+            const tx  = _adminDB.transaction('respondents', 'readwrite');
+            const req = tx.objectStore('respondents').put(doc);
+            req.onsuccess = () => resolve();
+            req.onerror   = () => reject(req.error);
+        });
+    }
+
+    function idbHasRespondent(pk) {
+        return new Promise((resolve) => {
+            if (!_adminDB) { resolve(false); return; }
+            const tx  = _adminDB.transaction('respondents', 'readonly');
+            const req = tx.objectStore('respondents').getKey(pk);
+            req.onsuccess = () => resolve(!!req.result);
+            req.onerror   = () => resolve(false);
+        });
+    }
+
+    function idbGetAllRespondents(surveyIdFilter, enumeratorFilter) {
+        return new Promise((resolve) => {
+            if (!_adminDB) { resolve([]); return; }
+            const tx    = _adminDB.transaction('respondents', 'readonly');
+            const store = tx.objectStore('respondents');
+            const req   = store.getAll();
+            req.onsuccess = () => {
+                let results = req.result || [];
+                if (surveyIdFilter)   results = results.filter(r => r.surveyId     === surveyIdFilter);
+                if (enumeratorFilter) results = results.filter(r => r.enumeratorId === enumeratorFilter);
+                resolve(results);
+            };
+            req.onerror = () => resolve([]);
+        });
+    }
+
+    function idbGetDistinctSurveys() {
+        return new Promise((resolve) => {
+            if (!_adminDB) { resolve([]); return; }
+            const tx  = _adminDB.transaction('survey_registry', 'readonly');
+            const req = tx.objectStore('survey_registry').getAll();
+            req.onsuccess = () => resolve(req.result || []);
+            req.onerror   = () => resolve([]);
+        });
+    }
+
+    function idbPutSurveyRegistry(entry) {
+        return new Promise((resolve) => {
+            if (!_adminDB) { resolve(); return; }
+            const tx  = _adminDB.transaction('survey_registry', 'readwrite');
+            const req = tx.objectStore('survey_registry').put(entry);
+            req.onsuccess = () => resolve();
+            req.onerror   = () => resolve();
+        });
+    }
+
+    function idbClearAll() {
+        return new Promise((resolve) => {
+            if (!_adminDB) { resolve(); return; }
+            const tx = _adminDB.transaction(['respondents','survey_registry'], 'readwrite');
+            tx.objectStore('respondents').clear();
+            tx.objectStore('survey_registry').clear();
+            tx.oncomplete = () => resolve();
+            tx.onerror    = () => resolve();
+        });
+    }
+
+    /* ════════════════════════════════════════════════════
+       IMPORT SYSTEM
+    ════════════════════════════════════════════════════ */
+    function handleImportFiles(event) {
+        const files = Array.from(event.target.files);
+        if (!files.length) return;
+        event.target.value = '';
+        processImportFiles(files);
+    }
+
+    function handleImportDrop(event) {
+        event.preventDefault();
+        document.getElementById('import-drop-zone').classList.remove('drag-over');
+        const files = Array.from(event.dataTransfer.files).filter(f => f.name.endsWith('.json'));
+        if (!files.length) { addImportLog('No valid JSON files found in drop.', 'warn'); return; }
+        processImportFiles(files);
+    }
+
+    async function processImportFiles(files) {
+        if (!_adminDB) {
+            try { await openAdminDB(); } catch(e) {
+                addImportLog('IndexedDB unavailable: ' + e.message, 'err');
+                return;
+            }
+        }
+        showImportLog();
+        addImportLog(`Processing ${files.length} file(s)…`, 'ok');
+
+        let totalAdded = 0, totalSkipped = 0;
+
+        for (const file of files) {
+            try {
+                const text = await file.text();
+                const obj  = JSON.parse(text);
+
+                /* ── Detect format ──────────────────────────────────────────
+                   v1.0 (new enumerator export):
+                     { version:"1.0", survey_info:{id,name,...},
+                       enumerator_info:{name}, responses:[...] }
+                   Legacy format:
+                     { surveyId, surveyName, enumeratorId, respondents:[...] }
+                ─────────────────────────────────────────────────────────── */
+                const isV1 = obj.version === '1.0' && Array.isArray(obj.responses);
+
+                // ── Validate ──────────────────────────────────────────────
+                if (!isV1 && !obj.respondents) {
+                    addImportLog(`⚠ ${file.name}: unrecognised format — skipped`, 'warn');
+                    continue;
+                }
+
+                // ── Extract survey metadata ───────────────────────────────
+                const surveyId = isV1
+                    ? ((obj.survey_info && obj.survey_info.id)   || 'unknown')
+                    : (obj.surveyId || 'unknown');
+
+                const surveyName = isV1
+                    ? ((obj.survey_info && obj.survey_info.name) || surveyId)
+                    : (obj.surveyName || obj.surveyTitle || surveyId);
+
+                // ── Extract enumerator identity ───────────────────────────
+                // v1.0: enumerator_info.name  |  legacy: enumeratorId
+                const fileEnumeratorId = isV1
+                    ? ((obj.enumerator_info && obj.enumerator_info.name) || '')
+                    : (obj.enumeratorId || '');
+
+                const fileDeviceId = obj.deviceId || '';
+
+                await idbPutSurveyRegistry({ surveyId, surveyName, importedAt: new Date().toISOString() });
+
+                // ── Normalise to flat array ───────────────────────────────
+                let respondents;
+                if (isV1) {
+                    respondents = obj.responses;
+                } else {
+                    respondents = Array.isArray(obj.respondents)
+                        ? obj.respondents
+                        : Object.entries(obj.respondents).map(([rid, r]) => ({ respondentId: rid, ...r }));
+                }
+
+                let fileAdded = 0, fileSkipped = 0;
+
+                for (const r of respondents) {
+                    // v1.0 uses r.id; legacy uses r.respondentId
+                    const respondentId = r.id || r.respondentId
+                        || ('R-' + Math.random().toString(36).slice(2, 8));
+
+                    const pk = surveyId + '::' + respondentId;
+
+                    const exists = await idbHasRespondent(pk);
+                    if (exists) { fileSkipped++; continue; }
+
+                    // v1.0: r.respondent (profile)  |  legacy: r.meta
+                    const meta = r.respondent || r.meta || {};
+
+                    // Both formats use r.answers as flat {question:answer}
+                    const answers = (typeof r.answers === 'object' && !Array.isArray(r.answers))
+                        ? r.answers : {};
+
+                    // v1.0: start_time/end_time  |  legacy: startTime/endTime
+                    const startTime = r.start_time || r.startTime || '';
+                    const endTime   = r.end_time   || r.endTime   || '';
+
+                    // Per-record enumerator id (legacy may embed it per record)
+                    const enumeratorId = r.enumeratorId || fileEnumeratorId;
+
+                    const doc = {
+                        _pk:         pk,
+                        respondentId,
+                        surveyId,
+                        surveyName,
+                        enumeratorId,
+                        deviceId:    r.deviceId || fileDeviceId,
+                        meta,
+                        answers,
+                        startTime,
+                        endTime,
+                        completed: r.completed === true || r.completed === 'Yes'
+                    };
+
+                    await idbPutRespondent(doc);
+                    fileAdded++;
+                }
+
+                const fmt = isV1 ? 'v1.0' : 'legacy';
+                addImportLog(
+                    `✓ ${file.name} [${fmt}]: +${fileAdded} added, ${fileSkipped} duplicates skipped`,
+                    'ok'
+                );
+                totalAdded   += fileAdded;
+                totalSkipped += fileSkipped;
+
+            } catch(e) {
+                addImportLog(`✗ ${file.name}: ${e.message}`, 'err');
+            }
+        }
+
+        addImportLog(`Done — Total: +${totalAdded} added, ${totalSkipped} skipped.`, 'ok');
+        await refreshImportedData();
+    }
+
+    /* ════════════════════════════════════════════════════════════
+       SYNC FROM BACKEND SERVER
+    ════════════════════════════════════════════════════════════ */
+    const BACKEND_URL = 'https://labour-market-survey-backend-production.up.railway.app';
+
+    async function syncFromServer() {
+        if (!_adminDB) {
+            try { await openAdminDB(); } catch(e) { return; }
+        }
+
+        try {
+            const res = await fetch(`${BACKEND_URL}/api/responses`);
+            if (!res.ok) return;
+
+            const data = await res.json();
+            const rows = data.responses || [];
+            if (rows.length === 0) return;
+
+            let added = 0;
+
+            for (const doc of rows) {
+                const surveyId     = doc.surveyId     || 'unknown';
+                const respondentId = doc.respondentId || ('R-' + Math.random().toString(36).slice(2, 8));
+                // Use the pk that the server assigned (includes enumeratorId) to avoid collision
+                const pk = doc._pk || `${surveyId}::${respondentId}`;
+
+                await idbPutSurveyRegistry({
+                    surveyId,
+                    surveyName: doc.surveyName || surveyId,
+                    importedAt: new Date().toISOString()
+                });
+
+                const exists = await idbHasRespondent(pk);
+                if (exists) continue;
+
+                await idbPutRespondent({
+                    _pk:          pk,
+                    respondentId,
+                    surveyId,
+                    surveyName:   doc.surveyName    || '',
+                    enumeratorId: doc.enumeratorId  || '',
+                    meta:         doc.meta          || {},
+                    answers:      doc.answers       || {},
+                    startTime:    doc.startTime     || '',
+                    endTime:      doc.endTime       || '',
+                    completed:    doc.completed     === true
+                });
+                added++;
+            }
+
+            if (added > 0) await refreshImportedData();
+
+        } catch(e) { /* silent — server may be offline */ }
+    }
+
+    /* ── syncThenRefresh: used by Refresh button and tab switch ── */
+    async function syncThenRefresh() {
+        await syncFromServer();
+        await loadResponses();
+        await refreshImportedData();
+    }
+
+    function showImportLog() {
+        const el = document.getElementById('import-log');
+        if (el) { el.innerHTML = ''; el.classList.add('show'); }
+    }
+
+    function addImportLog(msg, type) {
+        const el = document.getElementById('import-log');
+        if (!el) return;
+        const line = document.createElement('div');
+        line.className = 'import-log-line ' + (type || '');
+        line.textContent = msg;
+        el.appendChild(line);
+        el.scrollTop = el.scrollHeight;
+    }
+
+    async function clearImportedData() {
+        if (!confirm('⚠️ Delete all imported respondent data? This cannot be undone.')) return;
+        await idbClearAll();
+        addImportLog('All imported data cleared.', 'warn');
+        await refreshImportedData();
+    }
+
+    /* ════════════════════════════════════════════════════
+       REFRESH — SURVEY TYPE & ENUMERATOR DROPDOWNS + SUMMARY
+    ════════════════════════════════════════════════════ */
+    let _importedPage    = 0;
+    const IMPORT_PAGE_SZ = 50;
+
+    async function refreshImportedData() {
+        if (!_adminDB) return;
+
+        const surveyTypeEl  = document.getElementById('filter-survey-type');
+        const enumeratorEl  = document.getElementById('filter-enumerator');
+        const surveyFilter  = surveyTypeEl  ? surveyTypeEl.value  : '';
+        const enumFilter    = enumeratorEl  ? enumeratorEl.value  : '';
+
+        const [allDocs, surveyRegistry] = await Promise.all([
+            idbGetAllRespondents(surveyFilter, enumFilter),
+            idbGetDistinctSurveys()
+        ]);
+
+        populateSurveyTypeDropdown(surveyRegistry, surveyFilter);
+        populateEnumeratorDropdown(allDocs, enumFilter, surveyFilter);
+        updateImportSummary(allDocs);
+        _importedPage = 0;
+        renderImportedTable(allDocs);
+    }
+
+    function populateSurveyTypeDropdown(registry, currentVal) {
+        const sel = document.getElementById('filter-survey-type');
+        if (!sel) return;
+        const prev = currentVal || sel.value;
+        sel.innerHTML = '<option value="">— All Surveys —</option>';
+        registry.forEach(s => {
+            const opt = document.createElement('option');
+            opt.value = s.surveyId;
+            opt.textContent = s.surveyName ? `${s.surveyName} (${s.surveyId})` : s.surveyId;
+            if (s.surveyId === prev) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    async function populateEnumeratorDropdown(docs, currentVal, surveyFilter) {
+        const sel = document.getElementById('filter-enumerator');
+        if (!sel) return;
+        const prev = currentVal || sel.value;
+
+        let source = docs;
+        if (!source || source.length === 0) {
+            source = await idbGetAllRespondents(surveyFilter, '');
+        }
+
+        const enums = [...new Set(source.map(d => d.enumeratorId).filter(Boolean))].sort();
+        sel.innerHTML = '<option value="">— All Enumerators —</option>';
+        enums.forEach(eid => {
+            const opt = document.createElement('option');
+            opt.value = eid;
+            opt.textContent = eid;
+            if (eid === prev) opt.selected = true;
+            sel.appendChild(opt);
+        });
+    }
+
+    function updateImportSummary(docs) {
+        const total      = docs.length;
+        const completed  = docs.filter(d => d.completed).length;
+        const incomplete = total - completed;
+        const enums      = new Set(docs.map(d => d.enumeratorId).filter(Boolean)).size;
+
+        const setSC = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setSC('sc-total',      total);
+        setSC('sc-completed',  completed);
+        setSC('sc-incomplete', incomplete);
+        setSC('sc-enumerators', enums);
+
+        const breakdownEl = document.getElementById('enum-breakdown-container');
+        if (!breakdownEl) return;
+
+        if (enums === 0) { breakdownEl.innerHTML = ''; return; }
+
+        const enumCounts = {};
+        docs.forEach(d => {
+            const eid = d.enumeratorId || '(unknown)';
+            enumCounts[eid] = (enumCounts[eid] || 0) + 1;
+        });
+
+        const rows = Object.entries(enumCounts)
+            .sort((a, b) => b[1] - a[1])
+            .map(([eid, cnt]) => `<div class="enum-breakdown-row"><span>${eid}</span><strong>${cnt}</strong></div>`)
+            .join('');
+
+        breakdownEl.innerHTML = `
+            <div style="margin-top:0.75rem;">
+                <div style="font-size:0.8rem;font-weight:600;color:#495057;margin-bottom:0.35rem;">📊 Respondents per Enumerator</div>
+                <div class="enum-breakdown">${rows}</div>
+            </div>`;
+    }
+
+    function onSurveyTypeFilterChange() {
+        _importedPage = 0;
+        refreshImportedData();
+        updateFilterStatus();
+    }
+
+    function applyImportedFilters() {
+        _importedPage = 0;
+        refreshImportedData();
+        updateFilterStatus();
+    }
+
+    /* ════════════════════════════════════════════════════
+       IMPORTED RESPONSES TABLE  (paginated lazy render)
+    ════════════════════════════════════════════════════ */
+    function renderImportedTable(docs) {
+        const container = document.getElementById('imported-table-section');
+        if (!container) return;
+
+        if (!docs || docs.length === 0) {
+            container.innerHTML = '<div class="imported-empty">No imported data. Upload enumerator export files above.</div>';
+            return;
+        }
+
+        const totalPages  = Math.ceil(docs.length / IMPORT_PAGE_SZ);
+        const currentPage = Math.max(0, Math.min(_importedPage, totalPages - 1));
+        const slice       = docs.slice(currentPage * IMPORT_PAGE_SZ, (currentPage + 1) * IMPORT_PAGE_SZ);
+
+        const allAnswerKeys = [...new Set(docs.flatMap(d => Object.keys(d.answers || {})))].slice(0, 20);
+
+        const headers = ['respondentId','surveyId','enumeratorId','completed','startTime','endTime',
+                         'name','age','gender','education', ...allAnswerKeys];
+
+        const ths = headers.map(h => `<th title="${h}">${h}</th>`).join('');
+
+        const rowsHtml = slice.map(doc => {
+            const meta = doc.meta || {};
+            const answers = doc.answers || {};
+            const cells = headers.map(h => {
+                let val = '';
+                if (h === 'respondentId')  val = doc.respondentId || '';
+                else if (h === 'surveyId') val = doc.surveyId || '';
+                else if (h === 'enumeratorId') val = doc.enumeratorId || '';
+                else if (h === 'completed') val = doc.completed
+                    ? '<span class="badge-complete">✓ Complete</span>'
+                    : '<span class="badge-incomplete">Incomplete</span>';
+                else if (h === 'startTime') val = doc.startTime ? doc.startTime.slice(0,16).replace('T',' ') : '';
+                else if (h === 'endTime')   val = doc.endTime   ? doc.endTime.slice(0,16).replace('T',' ')   : '';
+                else if (['name','age','gender','education'].includes(h)) val = meta[h] || '';
+                else val = answers[h] !== undefined ? String(answers[h]) : '';
+                const safeVal = String(val).replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+                return `<td title="${safeVal}">${val}</td>`;
+            }).join('');
+            return `<tr>${cells}</tr>`;
+        }).join('');
+
+        const pagerInfo  = `${currentPage * IMPORT_PAGE_SZ + 1}–${Math.min((currentPage+1)*IMPORT_PAGE_SZ, docs.length)} of ${docs.length}`;
+        const prevDisabled = currentPage === 0 ? 'disabled' : '';
+        const nextDisabled = currentPage >= totalPages - 1 ? 'disabled' : '';
+
+        container.innerHTML = `
+            <div class="imported-pager">
+                <button ${prevDisabled} onclick="importedPageNav(-1,${docs.length})">◀ Prev</button>
+                <span>${pagerInfo}</span>
+                <button ${nextDisabled} onclick="importedPageNav(1,${docs.length})">Next ▶</button>
+                <span style="margin-left:auto;font-size:0.78rem;color:#6c757d;">${totalPages > 1 ? `Page ${currentPage+1} of ${totalPages}` : ''}</span>
+            </div>
+            <div class="imported-table-wrap">
+                <table class="imported-table">
+                    <thead><tr>${ths}</tr></thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>`;
+    }
+
+    function importedPageNav(dir, totalDocs) {
+        const totalPages = Math.ceil(totalDocs / IMPORT_PAGE_SZ);
+        _importedPage = Math.max(0, Math.min(_importedPage + dir, totalPages - 1));
+        const surveyFilter = (document.getElementById('filter-survey-type') || {}).value || '';
+        const enumFilter   = (document.getElementById('filter-enumerator')  || {}).value || '';
+        idbGetAllRespondents(surveyFilter, enumFilter).then(docs => renderImportedTable(docs));
+    }
+
+    /* ════════════════════════════════════════════════════
+       EXPORT COMBINED EXCEL  (filtered imported data)
+    ════════════════════════════════════════════════════ */
+    async function exportCombinedExcel() {
+        if (!_adminDB) { alert('Database not ready'); return; }
+
+        const surveyFilter = (document.getElementById('filter-survey-type') || {}).value || '';
+        const enumFilter   = (document.getElementById('filter-enumerator')  || {}).value || '';
+        const docs = await idbGetAllRespondents(surveyFilter, enumFilter);
+
+        if (!docs.length) { alert('No imported data to export.'); return; }
+
+        const metaFilters = activeFilters || {};
+        const filtered = docs.filter(d => {
+            const m = d.meta || {};
+            if (metaFilters.gender    && m.gender    !== metaFilters.gender)    return false;
+            if (metaFilters.age       && m.age        !== metaFilters.age)       return false;
+            if (metaFilters.education && m.education  !== metaFilters.education) return false;
+            if (metaFilters.sector    && m.sector      !== metaFilters.sector)   return false;
+            return true;
+        });
+
+        if (!filtered.length) { alert('No data matches current filters.'); return; }
+
+        if (typeof ExcelJS === 'undefined') { alert('ExcelJS library not loaded'); return; }
+
+        const wb   = new ExcelJS.Workbook();
+        const ws   = wb.addWorksheet('Imported Responses');
+
+        const allAnswerKeys = [...new Set(filtered.flatMap(d => Object.keys(d.answers || {})))];
+        const metaKeys      = ['name','age','gender','education'];
+
+        const columns = [
+            { header: 'respondentId', key: 'respondentId', width: 18 },
+            { header: 'surveyId',     key: 'surveyId',     width: 20 },
+            { header: 'surveyName',   key: 'surveyName',   width: 25 },
+            { header: 'enumeratorId', key: 'enumeratorId', width: 18 },
+            { header: 'deviceId',     key: 'deviceId',     width: 28 },
+            { header: 'completed',    key: 'completed',    width: 12 },
+            { header: 'startTime',    key: 'startTime',    width: 20 },
+            { header: 'endTime',      key: 'endTime',      width: 20 },
+            ...metaKeys.map(k => ({ header: k, key: 'meta_' + k, width: 18 })),
+            ...allAnswerKeys.map(k => ({ header: k, key: 'ans_' + k, width: 30 }))
+        ];
+        ws.columns = columns;
+
+        filtered.forEach(doc => {
+            const row = {
+                respondentId: doc.respondentId || '',
+                surveyId:     doc.surveyId     || '',
+                surveyName:   doc.surveyName   || '',
+                enumeratorId: doc.enumeratorId || '',
+                deviceId:     doc.deviceId     || '',
+                completed:    doc.completed ? 'Yes' : 'No',
+                startTime:    doc.startTime || '',
+                endTime:      doc.endTime   || ''
+            };
+            const m = doc.meta    || {};
+            const a = doc.answers || {};
+            metaKeys.forEach(k => { row['meta_' + k] = m[k] || ''; });
+            allAnswerKeys.forEach(k => { row['ans_' + k] = a[k] !== undefined ? String(a[k]) : ''; });
+            ws.addRow(row);
+        });
+
+        ws.getRow(1).font = { bold: true, color: { argb: 'FFFFFFFF' } };
+        ws.getRow(1).fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF667eea' } };
+
+        const buffer = await wb.xlsx.writeBuffer();
+        const blob   = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+        const url    = URL.createObjectURL(blob);
+        const a      = document.createElement('a');
+        a.href       = url;
+        const suf    = surveyFilter ? ('_' + surveyFilter) : '';
+        a.download   = `lms_combined_export${suf}_${new Date().toISOString().slice(0,10)}.xlsx`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+</script>
+</body>
+</html>
