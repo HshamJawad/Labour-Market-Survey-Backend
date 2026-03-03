@@ -1752,6 +1752,50 @@
         ════════════════════════════════════════════════════ */
         const BACKEND_URL = 'https://labour-market-survey-backend-production.up.railway.app';
 
+        /* ── Silent auto-upload: called after each submit ──────────────────── */
+        async function autoUploadOne(respondentId, respondent) {
+            try {
+                const flatAns = flattenAnswers(respondent.answers || {});
+                const payload = {
+                    version:          '1.0',
+                    export_timestamp: new Date().toISOString(),
+                    survey_info: {
+                        id:           surveyConfig ? (surveyConfig.surveyId    || '') : '',
+                        name:         surveyConfig ? (surveyConfig.surveyTitle || surveyConfig.projectTitle || '') : '',
+                        organization: surveyConfig ? (surveyConfig.organization || '') : '',
+                        location:     surveyConfig ? (surveyConfig.location     || '') : ''
+                    },
+                    enumerator_info: { name: _enumeratorId || '' },
+                    responses: [{
+                        id:          respondentId,
+                        respondent:  {
+                            name:      (respondent.meta && respondent.meta.name)      || '',
+                            age:       (respondent.meta && respondent.meta.age)       || '',
+                            gender:    (respondent.meta && respondent.meta.gender)    || '',
+                            education: (respondent.meta && respondent.meta.education) || ''
+                        },
+                        answers:     flatAns,
+                        start_time:  respondent.startTime || '',
+                        end_time:    respondent.endTime   || '',
+                        completed:   true
+                    }]
+                };
+
+                const res  = await fetch(`${BACKEND_URL}/api/import`, {
+                    method:  'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body:    JSON.stringify(payload)
+                });
+                const data = await res.json();
+                if (res.ok && data.added > 0) {
+                    setDMStatus('✓ Response saved to server.', 'success');
+                }
+            } catch(e) {
+                // Silent — offline or server down; local copy is safe
+                setDMStatus('⚠ Server offline — response saved locally only.', 'error');
+            }
+        }
+
         async function uploadToServer() {
             const btn = document.getElementById('upload-to-server-btn');
             if (btn) { btn.disabled = true; btn.textContent = 'Uploading…'; }
@@ -1904,7 +1948,20 @@
             try { _db = await openDB(); } catch(e) { _db = null; }
 
             await loadEnumeratorId();
-            await loadStoreFromDB();
+
+            // ── Fresh start: clear any leftover data from a previous session ──
+            // sessionStorage is cleared when the browser tab is closed,
+            // so this only runs on a genuine new open (not mid-session refresh).
+            if (!sessionStorage.getItem('lms_session_active')) {
+                sessionStorage.setItem('lms_session_active', '1');
+                _memStore = { activeRespondentId: null, respondents: {} };
+                try {
+                    if (_db) await idbPut('surveys', STORE_KEY, _memStore);
+                    localStorage.removeItem(STORE_KEY);
+                } catch(e) {}
+            } else {
+                await loadStoreFromDB();
+            }
 
             _memStore = migrateLegacyData(_memStore);
             _memStore = ensureActiveRespondent(_memStore);
@@ -2189,6 +2246,12 @@
             saveStore(store);
             showSuccessModal();
 
+            // ── Auto-upload the completed response to server (non-blocking) ──
+            autoUploadOne(id, store.respondents[id] ? store.respondents[id] : {
+                meta: { ...profileData }, answers: formData,
+                startTime: '', endTime: new Date().toISOString(), completed: true
+            });
+
             formData    = {};
             profileData = {};
 
@@ -2212,10 +2275,18 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
-        window.addEventListener('beforeunload', () => {
+        window.addEventListener('beforeunload', (e) => {
             clearTimeout(_idbFlushTimer);
             if (_idbDirty) {
                 try { localStorage.setItem(STORE_KEY, JSON.stringify(_memStore)); } catch(e) {}
+            }
+
+            // Warn if completed responses haven't been confirmed on server
+            const completed = Object.values(_memStore.respondents || {}).filter(r => r.completed);
+            const synced    = (document.getElementById('dm-status') || {}).textContent || '';
+            if (completed.length > 0 && !synced.includes('saved to server')) {
+                e.preventDefault();
+                e.returnValue = `${completed.length} response(s) may not be uploaded. Use "Upload to Server" before closing.`;
             }
         });
 

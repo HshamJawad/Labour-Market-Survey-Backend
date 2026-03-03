@@ -10,6 +10,10 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 
+// ─── In-memory short URL store ────────────────────────────────────────────────
+const redirects = new Map();   // code → full URL
+function makeCode() { return Math.random().toString(36).slice(2, 8); }
+
 // ─── GET / ───────────────────────────────────────────────────────────────────
 app.get('/', (_req, res) => res.json({
     name: 'LMS MVP API',
@@ -17,9 +21,41 @@ app.get('/', (_req, res) => res.json({
         'GET  /health',
         'GET  /api/surveys',
         'POST /api/import',
-        'GET  /api/responses?surveyId=&enumeratorId='
+        'GET  /api/responses?surveyId=&enumeratorId=',
+        'POST /api/shorten',
+        'GET  /r/:code'
     ]
 }));
+
+// ─── GET /r/:code ── short URL redirect ──────────────────────────────────────
+app.get('/r/:code', (req, res) => {
+    const url = redirects.get(req.params.code);
+    if (!url) return res.status(404).send('Link not found or expired. Please regenerate from admin.');
+    res.redirect(302, url);
+});
+
+// ─── POST /api/shorten ── create short URL ───────────────────────────────────
+// Body: { url: "https://..." }
+// Returns: { code: "abc123", shortUrl: "https://backend/r/abc123" }
+app.post('/api/shorten', (req, res) => {
+    const { url } = req.body;
+    if (!url || typeof url !== 'string') {
+        return res.status(400).json({ error: 'url is required' });
+    }
+
+    // Re-use existing code if same URL was already shortened
+    for (const [code, stored] of redirects) {
+        if (stored === url) {
+            const shortUrl = `${req.protocol}://${req.get('host')}/r/${code}`;
+            return res.json({ code, shortUrl });
+        }
+    }
+
+    const code     = makeCode();
+    const shortUrl = `${req.protocol}://${req.get('host')}/r/${code}`;
+    redirects.set(code, url);
+    res.json({ code, shortUrl });
+});
 
 // ─── GET /health ─────────────────────────────────────────────────────────────
 app.get('/health', (_req, res) => res.json({

@@ -1249,7 +1249,7 @@
 <div class="response-stats">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3>Response Statistics</h3>
-                <button class="btn btn-secondary btn-small" onclick="loadResponses()">🔄 Refresh Responses</button>
+                <button class="btn btn-secondary btn-small" onclick="syncThenRefresh()">🔄 Refresh Responses</button>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Total Responses</div>
@@ -1276,7 +1276,6 @@
                 </div>
                 <div style="display:flex;align-items:flex-end;gap:0.5rem;">
                     <button class="btn btn-success btn-small" onclick="document.getElementById('import-enum-files').click()">📂 Import Files</button>
-                    <button class="btn btn-small" style="background:#6f42c1;color:white;border-color:#6f42c1;" onclick="syncFromServer()">☁ Sync from Server</button>
                     <button class="btn btn-primary btn-small" onclick="exportCombinedExcel()">📊 Export Filtered Excel</button>
                     <button class="btn btn-danger btn-small" onclick="clearImportedData()">🗑 Clear Imported</button>
                 </div>
@@ -1636,7 +1635,10 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         loadResponses();
         updateSurveyIdDisplay();
         renderSurveysList();
-        openAdminDB().then(() => refreshImportedData());
+        openAdminDB().then(() => {
+            refreshImportedData();
+            syncFromServer();   // pull latest from server on every load
+        });
     });
 
     function setupEventListeners() {
@@ -1704,8 +1706,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         document.getElementById(tabName).classList.add('active');
 
         if (tabName === 'dashboard') {
-            loadResponses();
-            refreshImportedData();
+            syncThenRefresh();
         }
 
         if (tabName === 'survey-forms') {
@@ -2578,7 +2579,7 @@ responsesSheet.columns = [
         `).join('');
     }
 
-    function generateEnumeratorLink() {
+    async function generateEnumeratorLink() {
         const activeSurvey = getActiveSurvey();
         if (!activeSurvey) {
             alert('⚠️ No active survey selected');
@@ -2597,15 +2598,32 @@ responsesSheet.columns = [
             sections: activeSurvey.sections
         };
 
-        // Use LZString compression for shorter URLs
+        // Build full LZ-compressed link
         const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(surveyData));
-        const link = `${location.origin}${location.pathname.replace('admin.html', '')}enumerator.html#lz:${compressed}`;
-
-        state.enumeratorLink = link;
-        saveState();
+        const fullLink   = `${location.origin}${location.pathname.replace('admin.html', '')}enumerator.html#lz:${compressed}`;
 
         const el = document.getElementById('enumerator-link');
-        if (el) el.textContent = link;
+
+        // Try to shorten via backend
+        try {
+            const res  = await fetch(`${BACKEND_URL}/api/shorten`, {
+                method:  'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body:    JSON.stringify({ url: fullLink })
+            });
+            if (res.ok) {
+                const data = await res.json();
+                state.enumeratorLink = data.shortUrl;
+                saveState();
+                if (el) el.textContent = data.shortUrl;
+                return;
+            }
+        } catch(e) { /* backend unreachable — fall back to full link */ }
+
+        // Fallback: use full link
+        state.enumeratorLink = fullLink;
+        saveState();
+        if (el) el.textContent = fullLink;
     }
 
     function copyEnumeratorLink() {
@@ -3744,6 +3762,13 @@ responsesSheet.columns = [
         } catch(e) {
             addImportLog(`✗ Sync failed: ${e.message}`, 'err');
         }
+    }
+
+    /* ── syncThenRefresh: used by Refresh button and tab switch ── */
+    async function syncThenRefresh() {
+        await syncFromServer();
+        await loadResponses();
+        await refreshImportedData();
     }
 
     function showImportLog() {
