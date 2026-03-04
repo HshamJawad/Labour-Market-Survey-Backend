@@ -80,4 +80,10 @@ function queryResponses({ surveyId, enumeratorId } = {}) {
     return rows;
 }
 
-module.exports = { registerSurvey, getSurveys, insertResponse, queryResponses };
+/** Clear all responses and surveys */
+function clearAll() {
+    _data = { surveys: {}, responses: {} };
+    persist();
+}
+
+module.exports = { registerSurvey, getSurveys, insertResponse, queryResponses, clearAll };

@@ -127,6 +127,16 @@ app.post('/api/import', (req, res) => {
     }
 });
 
+// ─── DELETE /api/responses/all ── clear everything ───────────────────────────
+app.delete('/api/responses/all', (_req, res) => {
+    try {
+        store.clearAll();
+        res.json({ ok: true, message: 'All responses cleared' });
+    } catch(e) {
+        res.status(500).json({ error: e.message });
+    }
+});
+
 // ─── GET /api/responses ──────────────────────────────────────────────────────
 app.get('/api/responses', (req, res) => {
     const rows = store.queryResponses({

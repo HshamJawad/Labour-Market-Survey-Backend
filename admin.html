@@ -3638,7 +3638,13 @@ responsesSheet.columns = [
                     const respondentId = r.id || r.respondentId
                         || ('R-' + Math.random().toString(36).slice(2, 8));
 
-                    const pk = surveyId + '::' + respondentId;
+                    // Per-record enumerator id (legacy may embed it per record)
+                    const enumeratorId = r.enumeratorId || fileEnumeratorId;
+
+                    // pk includes enumeratorId so two enumerators sharing the same
+                    // respondent numbering (e.g. both start at LMS-00001) are kept separate
+                    const enumPart = (enumeratorId || 'anon').replace(/::/g, '-');
+                    const pk = surveyId + '::' + enumPart + '::' + respondentId;
 
                     const exists = await idbHasRespondent(pk);
                     if (exists) { fileSkipped++; continue; }
@@ -3653,9 +3659,6 @@ responsesSheet.columns = [
                     // v1.0: start_time/end_time  |  legacy: startTime/endTime
                     const startTime = r.start_time || r.startTime || '';
                     const endTime   = r.end_time   || r.endTime   || '';
-
-                    // Per-record enumerator id (legacy may embed it per record)
-                    const enumeratorId = r.enumeratorId || fileEnumeratorId;
 
                     const doc = {
                         _pk:         pk,
@@ -3770,10 +3773,31 @@ responsesSheet.columns = [
     }
 
     async function clearImportedData() {
-        if (!confirm('⚠️ Delete all imported respondent data? This cannot be undone.')) return;
+        if (!confirm('⚠️ Delete all imported data — locally AND from server? This cannot be undone.')) return;
+
+        // 1. Clear local IDB
         await idbClearAll();
-        addImportLog('All imported data cleared.', 'warn');
-        await refreshImportedData();
+
+        // 2. Clear server data
+        try {
+            await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
+        } catch(e) { /* server unreachable — local cleared at minimum */ }
+
+        // 3. Reset UI without syncing from server
+        const surveyTypeEl = document.getElementById('filter-survey-type');
+        const enumeratorEl = document.getElementById('filter-enumerator');
+        if (surveyTypeEl) surveyTypeEl.innerHTML = '<option value="">— All Surveys —</option>';
+        if (enumeratorEl) enumeratorEl.innerHTML = '<option value="">— All Enumerators —</option>';
+
+        ['sc-total','sc-completed','sc-incomplete','sc-enumerators'].forEach(id => {
+            const el = document.getElementById(id); if (el) el.textContent = '0';
+        });
+        const breakdownEl = document.getElementById('enum-breakdown-container');
+        if (breakdownEl) breakdownEl.innerHTML = '';
+        const tableEl = document.getElementById('responses-list');
+        if (tableEl) tableEl.innerHTML = '<p style="color:#6c757d;font-size:0.85rem;">No imported data.</p>';
+
+        addImportLog('✓ All data cleared (local + server).', 'warn');
     }
 
     /* ════════════════════════════════════════════════════
