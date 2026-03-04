@@ -1047,13 +1047,23 @@
             }
             err.style.display = 'none';
 
-            // If enumerator ID changed, clear all local data so this is a fresh independent session
+            // If enumerator ID changed, upload any pending data, then wipe and start fresh
             const prevId = _enumeratorId;
             if (prevId && prevId !== val) {
-                // Save new ID first, then wipe local data and reload fresh
+                // Flush any unsaved responses to backend under the OLD ID before wiping
+                try {
+                    await flushToDB();
+                    const store = loadStore();
+                    const respondents = store.respondents || {};
+                    const toUpload = Object.entries(respondents).filter(([, r]) => r.completed);
+                    for (const [id, r] of toUpload) {
+                        await autoUploadOne(id, r);
+                    }
+                } catch(e) { /* best-effort — carry on */ }
+
+                // Save new ID to IDB metadata (survives clearAppStorage)
                 await saveEnumeratorId(val);
                 clearAppStorage();
-                // Brief pause then reload so the new session starts clean
                 setTimeout(() => window.location.reload(), 300);
                 return;
             }

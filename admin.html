@@ -3850,23 +3850,79 @@ responsesSheet.columns = [
                 added++;
             }
 
-            if (added > 0) {
-                await refreshImportedData();
-                // Clear backend after successfully pulling all records —
-                // prevents the same responses reappearing on next refresh
-                try {
-                    await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
-                } catch(e) { /* silent — data already saved locally */ }
-            }
+            if (added > 0) await refreshImportedData();
+
+            // NOTE: We do NOT delete from backend here (auto-sync on page load).
+            // Deletion only happens on explicit user-triggered syncThenRefresh()
+            // to avoid race conditions where an enumerator uploads just as the
+            // admin page loads.
 
         } catch(e) { /* silent — server may be offline */ }
     }
 
-    /* ── syncThenRefresh: used by Refresh button and tab switch ── */
+    /* ── syncThenRefresh: used by Refresh button — pulls AND clears backend ── */
     async function syncThenRefresh() {
-        await syncFromServer();
-        await loadResponses();
-        await refreshImportedData();
+        const btn = document.querySelector('[onclick="syncThenRefresh()"]');
+        const origText = btn ? btn.textContent : '';
+        if (btn) { btn.disabled = true; btn.textContent = '⏳ Syncing…'; }
+
+        try {
+            if (!_adminDB) await openAdminDB();
+
+            const res = await fetch(`${BACKEND_URL}/api/responses`);
+            if (!res.ok) throw new Error('Server error: ' + res.status);
+
+            const data = await res.json();
+            const rows = data.responses || [];
+            let added = 0;
+
+            for (const doc of rows) {
+                const surveyId     = doc.surveyId     || 'unknown';
+                const respondentId = doc.respondentId || ('R-' + Math.random().toString(36).slice(2, 8));
+                const pk = doc._pk || `${surveyId}::${respondentId}`;
+
+                await idbPutSurveyRegistry({
+                    surveyId,
+                    surveyName: doc.surveyName || surveyId,
+                    importedAt: new Date().toISOString()
+                });
+
+                const exists = await idbHasRespondent(pk);
+                if (exists) continue;
+
+                await idbPutRespondent({
+                    _pk:          pk,
+                    respondentId,
+                    surveyId,
+                    surveyName:   doc.surveyName    || '',
+                    enumeratorId: doc.enumeratorId  || '',
+                    meta:         doc.meta          || {},
+                    answers:      doc.answers       || {},
+                    startTime:    doc.startTime     || '',
+                    endTime:      doc.endTime       || '',
+                    completed:    doc.completed     === true
+                });
+                added++;
+            }
+
+            // Only delete from backend AFTER all records are safely in local IDB
+            if (rows.length > 0) {
+                const delRes = await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
+                if (!delRes.ok) {
+                    addImportLog('⚠ Backend clear failed — data may reappear on next sync.', 'warn');
+                }
+            }
+
+            await loadResponses();
+            await refreshImportedData();
+
+            if (btn) {
+                btn.textContent = added > 0 ? `✓ +${added} new` : '✓ Up to date';
+                setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
+            }
+        } catch(e) {
+            if (btn) { btn.textContent = '⚠ Error'; setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000); }
+        }
     }
 
     function showImportLog() {
@@ -3887,15 +3943,19 @@ responsesSheet.columns = [
     async function clearImportedData() {
         if (!confirm('⚠️ Delete all imported data — locally AND from server? This cannot be undone.')) return;
 
-        // 1. Clear local IDB
+        // 1. Clear local IDB first
         await idbClearAll();
 
-        // 2. Clear server data
-        try {
-            await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
-        } catch(e) { /* server unreachable — local cleared at minimum */ }
+        // 2. Clear server data — retry once on failure
+        let serverCleared = false;
+        for (let attempt = 0; attempt < 2 && !serverCleared; attempt++) {
+            try {
+                const r = await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
+                serverCleared = r.ok;
+            } catch(e) { /* network issue — try again */ }
+        }
 
-        // 3. Reset UI without syncing from server
+        // 3. Reset UI
         const surveyTypeEl = document.getElementById('filter-survey-type');
         const enumeratorEl = document.getElementById('filter-enumerator');
         if (surveyTypeEl) surveyTypeEl.innerHTML = '<option value="">— All Surveys —</option>';
@@ -3909,7 +3969,11 @@ responsesSheet.columns = [
         const tableEl = document.getElementById('responses-list');
         if (tableEl) tableEl.innerHTML = '<p style="color:#6c757d;font-size:0.85rem;">No imported data.</p>';
 
-        addImportLog('✓ All data cleared (local + server).', 'warn');
+        if (serverCleared) {
+            addImportLog('✓ All data cleared (local + server).', 'warn');
+        } else {
+            addImportLog('⚠ Local data cleared but server could not be reached. Data may reappear on next Refresh — try clearing again when connected.', 'error');
+        }
     }
 
     /* ════════════════════════════════════════════════════
