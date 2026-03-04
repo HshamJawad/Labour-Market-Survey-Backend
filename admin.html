@@ -1088,6 +1088,39 @@
         }
         .imported-pager button:disabled { opacity: 0.4; cursor: default; }
         .imported-pager button:hover:not(:disabled) { background: #f0f4ff; border-color: #667eea; }
+        /* ── New Survey Modal ────────────────────────────── */
+        .ns-modal-overlay {
+            display: none;
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+        .ns-modal-overlay.active { display: flex; }
+        .ns-modal {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            width: min(420px, 90vw);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+        }
+        .ns-modal h3 { margin: 0 0 1.1rem; font-size: 1rem; color: #1a1a2e; }
+        .ns-modal label { display: block; font-size: 0.82rem; font-weight: 600; color: #495057; margin-bottom: 0.3rem; }
+        .ns-modal input, .ns-modal textarea {
+            width: 100%; padding: 0.5rem 0.65rem;
+            border: 1px solid #ced4da; border-radius: 5px;
+            font-size: 0.92rem; font-family: inherit;
+            box-sizing: border-box;
+        }
+        .ns-modal input:focus, .ns-modal textarea:focus {
+            outline: none; border-color: #667eea;
+            box-shadow: 0 0 0 2px rgba(102,126,234,0.15);
+        }
+        .ns-modal textarea { resize: vertical; min-height: 70px; }
+        .ns-modal .ns-field { margin-bottom: 1rem; }
+        .ns-modal-actions { display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 1.2rem; }
+        .ns-modal-actions .btn { min-width: 90px; }
     </style>
 </head>
 <body>
@@ -1243,6 +1276,25 @@
       <button class="btn btn-secondary" onclick="copyQRImage()">📋 Copy Image</button>
       <button class="btn btn-primary" onclick="downloadQR()">⬇ Download PNG</button>
       <button class="btn btn-danger" onclick="closeQRModal()">✕ Close</button>
+    </div>
+  </div>
+</div>
+
+<!-- New Survey Modal -->
+<div class="ns-modal-overlay" id="ns-modal-overlay">
+  <div class="ns-modal">
+    <h3>➕ Create New Survey</h3>
+    <div class="ns-field">
+      <label for="ns-title">Survey Title <span style="color:#dc3545">*</span></label>
+      <input type="text" id="ns-title" placeholder="e.g., Skills Gap Analysis 2026" autocomplete="off">
+    </div>
+    <div class="ns-field">
+      <label for="ns-desc">Description (optional)</label>
+      <textarea id="ns-desc" placeholder="Brief description of the survey objective…"></textarea>
+    </div>
+    <div class="ns-modal-actions">
+      <button class="btn btn-secondary" onclick="closeNewSurveyModal()">Cancel</button>
+      <button class="btn btn-primary" id="ns-confirm-btn" onclick="confirmNewSurvey()">Create</button>
     </div>
   </div>
 </div>
@@ -1638,6 +1690,18 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         openAdminDB().then(() => {
             refreshImportedData();
             syncFromServer();   // pull latest from server on every load
+        });
+
+        // Keyboard support for new-survey modal
+        document.getElementById('ns-title').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') { e.preventDefault(); confirmNewSurvey(); }
+            if (e.key === 'Escape') closeNewSurveyModal();
+        });
+        document.getElementById('ns-desc').addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') closeNewSurveyModal();
+        });
+        document.getElementById('ns-modal-overlay').addEventListener('click', function(e) {
+            if (e.target === this) closeNewSurveyModal();
         });
     });
 
@@ -3281,67 +3345,108 @@ responsesSheet.columns = [
 
     // === PHASE 4: Survey Forms Management ===
     function createNewSurvey() {
-        const title = prompt('Enter survey title:', 'New Survey');
-        if (!title) return;
-        
-        const description = prompt('Enter survey description (optional):', '');
-        
+        _renameCallback = null;
+        const overlay = document.getElementById('ns-modal-overlay');
+        const titleEl = document.getElementById('ns-title');
+        const descEl  = document.getElementById('ns-desc');
+        overlay.querySelector('h3').textContent = '➕ Create New Survey';
+        descEl.closest('.ns-field').style.display = '';
+        titleEl.value = '';
+        descEl.value  = '';
+        titleEl.style.borderColor = '';
+        overlay.classList.add('active');
+        setTimeout(() => titleEl.focus(), 80);
+    }
+
+    // ── Shared inline rename modal ────────────────────────────────────────────
+    let _renameCallback = null;
+
+    function openRenameModal(currentTitle, label, callback) {
+        _renameCallback = callback;
+        const overlay = document.getElementById('ns-modal-overlay');
+        const titleEl = document.getElementById('ns-title');
+        const descEl  = document.getElementById('ns-desc');
+        const heading = overlay.querySelector('h3');
+        const descField = descEl.closest('.ns-field');
+
+        heading.textContent  = label;
+        titleEl.value        = currentTitle;
+        descField.style.display = 'none';   // hide description for rename/duplicate
+        overlay.classList.add('active');
+        setTimeout(() => { titleEl.focus(); titleEl.select(); }, 80);
+    }
+
+    function closeNewSurveyModal() {
+        const overlay = document.getElementById('ns-modal-overlay');
+        overlay.classList.remove('active');
+        // Restore modal to "create" state
+        overlay.querySelector('h3').textContent = '➕ Create New Survey';
+        const descField = document.getElementById('ns-desc').closest('.ns-field');
+        descField.style.display = '';
+        document.getElementById('ns-title').style.borderColor = '';
+        _renameCallback = null;
+    }
+
+    function confirmNewSurvey() {
+        const title = document.getElementById('ns-title').value.trim();
+        if (!title) {
+            document.getElementById('ns-title').focus();
+            document.getElementById('ns-title').style.borderColor = '#dc3545';
+            return;
+        }
+        document.getElementById('ns-title').style.borderColor = '';
+
+        if (_renameCallback) {
+            const cb = _renameCallback;
+            closeNewSurveyModal();
+            cb(title);
+            return;
+        }
+
+        const description = document.getElementById('ns-desc').value.trim();
+        closeNewSurveyModal();
+
         const newSurveyId = generateSurveyId();
-        
         const newSurvey = {
             surveyId: newSurveyId,
-            title: title.trim(),
-            description: description ? description.trim() : '',
+            title: title,
+            description: description,
             sections: [],
             status: 'draft'
         };
-        
         state.surveys.push(newSurvey);
         state.activeSurveyId = newSurveyId;
-        
         saveState();
         renderSurveysList();
         renderSections();
-        
-        alert(`✅ Survey "${title}" created and activated`);
     }
 
     function duplicateSurvey(surveyId) {
         const survey = state.surveys.find(s => s.surveyId === surveyId);
         if (!survey) return;
-        
-        const newTitle = prompt('Enter title for duplicated survey:', survey.title + ' (Copy)');
-        if (!newTitle) return;
-        
-        const newSurveyId = generateSurveyId();
-        
-        const duplicated = {
-            surveyId: newSurveyId,
-            title: newTitle.trim(),
-            description: survey.description,
-            sections: JSON.parse(JSON.stringify(survey.sections)),
-            status: 'draft'
-        };
-        
-        state.surveys.push(duplicated);
-        
-        saveState();
-        renderSurveysList();
-        
-        alert(`✅ Survey duplicated as "${newTitle}"`);
+        openRenameModal(survey.title + ' (Copy)', '📋 Duplicate Survey — Enter Title', function(newTitle) {
+            const newSurveyId = generateSurveyId();
+            const duplicated = {
+                surveyId: newSurveyId,
+                title: newTitle,
+                description: survey.description,
+                sections: JSON.parse(JSON.stringify(survey.sections)),
+                status: 'draft'
+            };
+            state.surveys.push(duplicated);
+            saveState();
+            renderSurveysList();
+        });
     }
 
     function renameSurvey(surveyId) {
         const survey = state.surveys.find(s => s.surveyId === surveyId);
         if (!survey) return;
-        
-        const newTitle = prompt('Enter new survey title:', survey.title);
-        if (!newTitle) return;
-        
-        survey.title = newTitle.trim();
-        
-        saveState();
-        renderSurveysList();
+        openRenameModal(survey.title, '✏️ Rename Survey', function(newTitle) {
+            survey.title = newTitle;
+            saveState();
+            renderSurveysList();
+        });
     }
 
     function deleteSurvey(surveyId) {
@@ -3745,7 +3850,14 @@ responsesSheet.columns = [
                 added++;
             }
 
-            if (added > 0) await refreshImportedData();
+            if (added > 0) {
+                await refreshImportedData();
+                // Clear backend after successfully pulling all records —
+                // prevents the same responses reappearing on next refresh
+                try {
+                    await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
+                } catch(e) { /* silent — data already saved locally */ }
+            }
 
         } catch(e) { /* silent — server may be offline */ }
     }

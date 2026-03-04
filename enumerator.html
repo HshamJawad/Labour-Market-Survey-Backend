@@ -1046,6 +1046,18 @@
                 return;
             }
             err.style.display = 'none';
+
+            // If enumerator ID changed, clear all local data so this is a fresh independent session
+            const prevId = _enumeratorId;
+            if (prevId && prevId !== val) {
+                // Save new ID first, then wipe local data and reload fresh
+                await saveEnumeratorId(val);
+                clearAppStorage();
+                // Brief pause then reload so the new session starts clean
+                setTimeout(() => window.location.reload(), 300);
+                return;
+            }
+
             await saveEnumeratorId(val);
             document.getElementById('gate-overlay').classList.remove('show');
             const nameEl = document.getElementById('eb-name-display');
