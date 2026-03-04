@@ -1711,25 +1711,23 @@
          * Does NOT call localStorage.clear() — only removes known lms_* keys.
          */
         function clearAppStorage() {
-            // Collect all lms_* keys (covers all surveyId variants)
+            // Clear sessionStorage so reload is treated as a fresh open
+            try { sessionStorage.removeItem('lms_session_active'); } catch(e) {}
+
+            // Remove all lms_* keys from localStorage
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
-                if (key && key.startsWith('lms_')) {
-                    keysToRemove.push(key);
-                }
+                if (key && key.startsWith('lms_')) keysToRemove.push(key);
             }
-            keysToRemove.forEach(k => {
-                try { localStorage.removeItem(k); } catch(e) { /* silent */ }
-            });
+            keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
 
-            // Also wipe the IDB survey store entry for this session
+            // Wipe IDB surveys store
             if (_db) {
                 try {
-                    const tx    = _db.transaction('surveys', 'readwrite');
-                    const store = tx.objectStore('surveys');
-                    store.clear();
-                } catch(e) { /* non-critical — page reloads immediately */ }
+                    const tx = _db.transaction('surveys', 'readwrite');
+                    tx.objectStore('surveys').clear();
+                } catch(e) {}
             }
         }
 
@@ -2170,11 +2168,15 @@
             saveStore(store);
             showSuccessModal();
 
-            // ── Auto-upload the completed response to server (non-blocking) ──
-            autoUploadOne(id, store.respondents[id] ? store.respondents[id] : {
-                meta: { ...profileData }, answers: formData,
-                startTime: '', endTime: new Date().toISOString(), completed: true
-            });
+            // ── Auto-upload: capture snapshot now before formData/profileData are cleared ──
+            const uploadRespondent = {
+                meta:      { ...profileData },
+                answers:   JSON.parse(JSON.stringify(formData)),
+                startTime: store.respondents[id] ? store.respondents[id].startTime || '' : '',
+                endTime:   new Date().toISOString(),
+                completed: true
+            };
+            autoUploadOne(id, uploadRespondent);
 
             formData    = {};
             profileData = {};
