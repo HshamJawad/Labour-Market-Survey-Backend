@@ -1578,7 +1578,7 @@
             // Clear sessionStorage so reload is treated as a fresh open
             try { sessionStorage.removeItem('lms_session_active'); } catch(e) {}
 
-            // Remove all lms_* keys from localStorage
+            // Remove all lms_* keys from localStorage (includes lms_enumerator_id)
             const keysToRemove = [];
             for (let i = 0; i < localStorage.length; i++) {
                 const key = localStorage.key(i);
@@ -1586,13 +1586,17 @@
             }
             keysToRemove.forEach(k => { try { localStorage.removeItem(k); } catch(e) {} });
 
-            // Wipe IDB surveys store
+            // Wipe IDB surveys store AND metadata store (enumeratorId is stored here)
             if (_db) {
                 try {
-                    const tx = _db.transaction('surveys', 'readwrite');
+                    const tx = _db.transaction(['surveys', 'metadata'], 'readwrite');
                     tx.objectStore('surveys').clear();
+                    tx.objectStore('metadata').clear();
                 } catch(e) {}
             }
+
+            // Reset in-memory enumerator so the field renders empty after reload
+            _enumeratorId = '';
         }
 
         /* ════════════════════════════════════════════════════

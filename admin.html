@@ -3844,7 +3844,11 @@ responsesSheet.columns = [
                 for (const doc of rows) {
                     const surveyId     = doc.surveyId     || 'unknown';
                     const respondentId = doc.respondentId || ('R-' + Math.random().toString(36).slice(2, 8));
-                    const pk           = doc._pk || `${surveyId}::${respondentId}`;
+                    const enumeratorId = doc.enumeratorId || 'anon';
+                    // Always build pk with enumeratorId — matches store.js format exactly
+                    // Use server-assigned _pk when present (most reliable), otherwise build it
+                    const enumPart = enumeratorId.replace(/::/g, '-');
+                    const pk = doc._pk || `${surveyId}::${enumPart}::${respondentId}`;
 
                     await idbPutSurveyRegistry({
                         surveyId,
@@ -3860,7 +3864,7 @@ responsesSheet.columns = [
                         respondentId,
                         surveyId,
                         surveyName:   doc.surveyName   || '',
-                        enumeratorId: doc.enumeratorId || '',
+                        enumeratorId,
                         meta:         doc.meta         || {},
                         answers:      doc.answers      || {},
                         startTime:    doc.startTime    || '',
