@@ -1301,7 +1301,10 @@
 <div class="response-stats">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <h3>Response Statistics</h3>
-                <button class="btn btn-secondary btn-small" onclick="syncThenRefresh()">🔄 Refresh Responses</button>
+                <div style="display:flex;align-items:center;gap:0.6rem;">
+                    <span id="last-sync-time" style="font-size:0.75rem;color:#6c757d;">⚪ —</span>
+                    <button class="btn btn-secondary btn-small" onclick="syncThenRefresh()">🔄 Refresh Responses</button>
+                </div>
             </div>
             <div class="stat-item">
                 <div class="stat-label">Total Responses</div>
@@ -1689,7 +1692,7 @@ var QRCode;!function(){function a(a){this.mode=c.MODE_8BIT_BYTE,this.data=a,this
         renderSurveysList();
         openAdminDB().then(() => {
             refreshImportedData();
-            syncFromServer();   // pull latest from server on every load
+            doSync(false).then(() => startAutoPoll());  // initial sync then start polling
         });
 
         // Keyboard support for new-survey modal
@@ -3805,124 +3808,129 @@ responsesSheet.columns = [
     ════════════════════════════════════════════════════════════ */
     const BACKEND_URL = 'https://labour-market-survey-backend-production.up.railway.app';
 
-    async function syncFromServer() {
-        if (!_adminDB) {
-            try { await openAdminDB(); } catch(e) { return; }
-        }
+    /* ════════════════════════════════════════════════════════════
+       UNIFIED SYNC ENGINE
+       - Single function handles all syncing (page load + button + auto-poll)
+       - _syncing flag prevents race conditions
+       - Auto-polls every 15 seconds silently in background
+    ════════════════════════════════════════════════════════════ */
+    let _syncing        = false;
+    let _pollTimer      = null;
+    const POLL_INTERVAL = 15000; // 15 seconds
 
-        try {
-            const res = await fetch(`${BACKEND_URL}/api/responses`);
-            if (!res.ok) return;
+    /**
+     * Core sync: fetch backend → save new records to IDB → delete backend → update UI.
+     * @param {boolean} showFeedback  true = update the Refresh button text
+     */
+    async function doSync(showFeedback) {
+        if (_syncing) return;          // prevent overlapping calls
+        _syncing = true;
 
-            const data = await res.json();
-            const rows = data.responses || [];
-            if (rows.length === 0) return;
-
-            let added = 0;
-
-            for (const doc of rows) {
-                const surveyId     = doc.surveyId     || 'unknown';
-                const respondentId = doc.respondentId || ('R-' + Math.random().toString(36).slice(2, 8));
-                // Use the pk that the server assigned (includes enumeratorId) to avoid collision
-                const pk = doc._pk || `${surveyId}::${respondentId}`;
-
-                await idbPutSurveyRegistry({
-                    surveyId,
-                    surveyName: doc.surveyName || surveyId,
-                    importedAt: new Date().toISOString()
-                });
-
-                const exists = await idbHasRespondent(pk);
-                if (exists) continue;
-
-                await idbPutRespondent({
-                    _pk:          pk,
-                    respondentId,
-                    surveyId,
-                    surveyName:   doc.surveyName    || '',
-                    enumeratorId: doc.enumeratorId  || '',
-                    meta:         doc.meta          || {},
-                    answers:      doc.answers       || {},
-                    startTime:    doc.startTime     || '',
-                    endTime:      doc.endTime       || '',
-                    completed:    doc.completed     === true
-                });
-                added++;
-            }
-
-            if (added > 0) await refreshImportedData();
-
-            // NOTE: We do NOT delete from backend here (auto-sync on page load).
-            // Deletion only happens on explicit user-triggered syncThenRefresh()
-            // to avoid race conditions where an enumerator uploads just as the
-            // admin page loads.
-
-        } catch(e) { /* silent — server may be offline */ }
-    }
-
-    /* ── syncThenRefresh: used by Refresh button — pulls AND clears backend ── */
-    async function syncThenRefresh() {
         const btn = document.querySelector('[onclick="syncThenRefresh()"]');
-        const origText = btn ? btn.textContent : '';
-        if (btn) { btn.disabled = true; btn.textContent = '⏳ Syncing…'; }
+        if (showFeedback && btn) { btn.disabled = true; btn.textContent = '⏳ Syncing…'; }
 
         try {
             if (!_adminDB) await openAdminDB();
 
             const res = await fetch(`${BACKEND_URL}/api/responses`);
-            if (!res.ok) throw new Error('Server error: ' + res.status);
+            if (!res.ok) throw new Error('HTTP ' + res.status);
 
             const data = await res.json();
             const rows = data.responses || [];
-            let added = 0;
 
-            for (const doc of rows) {
-                const surveyId     = doc.surveyId     || 'unknown';
-                const respondentId = doc.respondentId || ('R-' + Math.random().toString(36).slice(2, 8));
-                const pk = doc._pk || `${surveyId}::${respondentId}`;
-
-                await idbPutSurveyRegistry({
-                    surveyId,
-                    surveyName: doc.surveyName || surveyId,
-                    importedAt: new Date().toISOString()
-                });
-
-                const exists = await idbHasRespondent(pk);
-                if (exists) continue;
-
-                await idbPutRespondent({
-                    _pk:          pk,
-                    respondentId,
-                    surveyId,
-                    surveyName:   doc.surveyName    || '',
-                    enumeratorId: doc.enumeratorId  || '',
-                    meta:         doc.meta          || {},
-                    answers:      doc.answers       || {},
-                    startTime:    doc.startTime     || '',
-                    endTime:      doc.endTime       || '',
-                    completed:    doc.completed     === true
-                });
-                added++;
-            }
-
-            // Only delete from backend AFTER all records are safely in local IDB
             if (rows.length > 0) {
-                const delRes = await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
-                if (!delRes.ok) {
-                    addImportLog('⚠ Backend clear failed — data may reappear on next sync.', 'warn');
+                // 1. Save all new records to local IDB first
+                let added = 0;
+                for (const doc of rows) {
+                    const surveyId     = doc.surveyId     || 'unknown';
+                    const respondentId = doc.respondentId || ('R-' + Math.random().toString(36).slice(2, 8));
+                    const pk           = doc._pk || `${surveyId}::${respondentId}`;
+
+                    await idbPutSurveyRegistry({
+                        surveyId,
+                        surveyName: doc.surveyName || surveyId,
+                        importedAt: new Date().toISOString()
+                    });
+
+                    const exists = await idbHasRespondent(pk);
+                    if (exists) continue;
+
+                    await idbPutRespondent({
+                        _pk:          pk,
+                        respondentId,
+                        surveyId,
+                        surveyName:   doc.surveyName   || '',
+                        enumeratorId: doc.enumeratorId || '',
+                        meta:         doc.meta         || {},
+                        answers:      doc.answers      || {},
+                        startTime:    doc.startTime    || '',
+                        endTime:      doc.endTime      || '',
+                        completed:    doc.completed    === true
+                    });
+                    added++;
                 }
+
+                // 2. Only delete backend AFTER all IDB writes are confirmed
+                try {
+                    await fetch(`${BACKEND_URL}/api/responses/all`, { method: 'DELETE' });
+                } catch(e) { /* network glitch — data safe in IDB, backend may have extras next sync */ }
+
+                // 3. Update UI
+                await refreshImportedData();
+
+                if (showFeedback && btn) {
+                    btn.textContent = added > 0 ? `✓ +${added} new` : '✓ Up to date';
+                    setTimeout(() => { btn.textContent = '🔄 Refresh Responses'; btn.disabled = false; }, 2000);
+                }
+
+                // 4. Update last-sync indicator
+                _updateLastSync(added > 0);
+
+            } else {
+                // Backend empty — just refresh UI from local IDB
+                await refreshImportedData();
+                if (showFeedback && btn) {
+                    btn.textContent = '✓ Up to date';
+                    setTimeout(() => { btn.textContent = '🔄 Refresh Responses'; btn.disabled = false; }, 1500);
+                }
+                _updateLastSync(false);
             }
 
-            await loadResponses();
-            await refreshImportedData();
-
-            if (btn) {
-                btn.textContent = added > 0 ? `✓ +${added} new` : '✓ Up to date';
-                setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000);
-            }
         } catch(e) {
-            if (btn) { btn.textContent = '⚠ Error'; setTimeout(() => { btn.textContent = origText; btn.disabled = false; }, 2000); }
+            if (showFeedback && btn) {
+                btn.textContent = '⚠ Offline';
+                setTimeout(() => { btn.textContent = '🔄 Refresh Responses'; btn.disabled = false; }, 2000);
+            }
+        } finally {
+            _syncing = false;
         }
+    }
+
+    function _updateLastSync(hadNew) {
+        const el = document.getElementById('last-sync-time');
+        if (!el) return;
+        const t = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        el.textContent = (hadNew ? '🟢 ' : '⚪ ') + t;
+    }
+
+    /** Called by Refresh button — shows feedback */
+    async function syncThenRefresh() {
+        await doSync(true);
+    }
+
+    /** Called on page load / tab switch / auto-poll — silent */
+    async function syncFromServer() {
+        await doSync(false);
+    }
+
+    /** Start background auto-poll */
+    function startAutoPoll() {
+        stopAutoPoll();
+        _pollTimer = setInterval(() => doSync(false), POLL_INTERVAL);
+    }
+
+    function stopAutoPoll() {
+        if (_pollTimer) { clearInterval(_pollTimer); _pollTimer = null; }
     }
 
     function showImportLog() {
@@ -3942,6 +3950,8 @@ responsesSheet.columns = [
 
     async function clearImportedData() {
         if (!confirm('⚠️ Delete all imported data — locally AND from server? This cannot be undone.')) return;
+
+        stopAutoPoll();
 
         // 1. Clear local IDB first
         await idbClearAll();
@@ -3969,11 +3979,16 @@ responsesSheet.columns = [
         const tableEl = document.getElementById('responses-list');
         if (tableEl) tableEl.innerHTML = '<p style="color:#6c757d;font-size:0.85rem;">No imported data.</p>';
 
+        const syncEl = document.getElementById('last-sync-time');
+        if (syncEl) syncEl.textContent = '⚪ —';
+
         if (serverCleared) {
             addImportLog('✓ All data cleared (local + server).', 'warn');
         } else {
-            addImportLog('⚠ Local data cleared but server could not be reached. Data may reappear on next Refresh — try clearing again when connected.', 'error');
+            addImportLog('⚠ Local data cleared but server could not be reached. Data may reappear on next sync — try clearing again when connected.', 'error');
         }
+
+        startAutoPoll();   // resume background polling
     }
 
     /* ════════════════════════════════════════════════════
