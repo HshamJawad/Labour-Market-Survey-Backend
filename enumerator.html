@@ -488,64 +488,6 @@
         }
 
         /* ── Enumerator ID bar ── */
-        .enumerator-bar {
-            background: #f0f4ff;
-            border: 1px solid #c5d0f7;
-            border-radius: 6px;
-            padding: 0.55rem 0.9rem;
-            margin-bottom: 1rem;
-            display: flex;
-            align-items: center;
-            gap: 0.6rem;
-            flex-wrap: wrap;
-        }
-
-        .enumerator-bar label {
-            font-weight: 600;
-            color: #3d4db7;
-            font-size: 0.82rem;
-            white-space: nowrap;
-        }
-
-        .enumerator-bar input[type="text"] {
-            flex: 1;
-            min-width: 140px;
-            padding: 0.3rem 0.55rem;
-            border: 1px solid #b3c0f5;
-            border-radius: 4px;
-            font-size: 0.88rem;
-            font-family: inherit;
-            background: white;
-            height: 30px;
-        }
-
-        .enumerator-bar input[type="text"]:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .enumerator-bar .eb-save-btn {
-            padding: 0.25rem 0.7rem;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            cursor: pointer;
-            height: 30px;
-            white-space: nowrap;
-        }
-
-        .enumerator-bar .eb-save-btn:hover { background: #5568d3; }
-
-        .enumerator-bar .eb-val {
-            font-weight: 600;
-            color: #3d4db7;
-            font-size: 0.85rem;
-            flex: 1;
-        }
-
         /* ── Data Management bar ── */
         .data-mgmt-card {
             background: #f8f9fa;
@@ -737,75 +679,6 @@
         .reset-dialog-actions .rd-confirm:disabled { opacity: 0.55; cursor: default; }
 
         /* ── Enumerator gate modal ── */
-        .gate-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.5);
-            z-index: 3000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .gate-overlay.show { display: flex; }
-
-        .gate-modal {
-            background: white;
-            border-radius: 8px;
-            padding: 1.75rem;
-            max-width: 380px;
-            width: 92%;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-        }
-
-        .gate-modal h2 {
-            font-size: 1.05rem;
-            color: #2c3e50;
-            margin-bottom: 0.4rem;
-        }
-
-        .gate-modal p {
-            font-size: 0.84rem;
-            color: #6c757d;
-            margin-bottom: 1rem;
-        }
-
-        .gate-modal input {
-            width: 100%;
-            padding: 0.6rem 0.75rem;
-            border: 1.5px solid #dee2e6;
-            border-radius: 5px;
-            font-size: 0.95rem;
-            font-family: inherit;
-            margin-bottom: 0.75rem;
-        }
-
-        .gate-modal input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-
-        .gate-modal button {
-            width: 100%;
-            padding: 0.65rem;
-            background: #667eea;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            font-size: 0.95rem;
-            font-weight: 600;
-            cursor: pointer;
-        }
-
-        .gate-modal button:hover { background: #5568d3; }
-
-        .gate-error {
-            font-size: 0.8rem;
-            color: #dc3545;
-            margin: -0.4rem 0 0.5rem;
-            display: none;
-        }
-
         /* ── Loading overlay ── */
         .loading-overlay {
             display: none;
@@ -854,16 +727,6 @@
     <div class="loading-overlay" id="loading-overlay">
         <div class="loading-spinner"></div>
         <p id="loading-msg">Processing...</p>
-    </div>
-
-    <div class="gate-overlay" id="gate-overlay">
-        <div class="gate-modal">
-            <h2>Enumerator Identification</h2>
-            <p>Enter your name or enumerator code. This will be recorded with all responses you collect.</p>
-            <input type="text" id="gate-input" placeholder="e.g. John Doe or ENUM-001" autocomplete="off">
-            <div class="gate-error" id="gate-error">Enumerator name is required to proceed.</div>
-            <button onclick="confirmEnumeratorId()">Continue to Survey</button>
-        </div>
     </div>
 
     <input type="file" id="import-file-input" accept=".json" style="display:none" onchange="handleImportFile(event)">
@@ -1028,50 +891,26 @@
             try { localStorage.setItem('lms_enumerator_id', eid); } catch(e) {}
         }
 
-        function showEnumeratorGate() {
-            const overlay = document.getElementById('gate-overlay');
-            const input   = document.getElementById('gate-input');
-            input.value   = _enumeratorId || '';
-            overlay.classList.add('show');
-            setTimeout(() => input.focus(), 100);
-        }
+        /* Called by the inline enumerator input on every change */
+        async function onEnumeratorInputChange(val) {
+            val = val.trim();
+            if (!val) return;
 
-        async function confirmEnumeratorId() {
-            const input = document.getElementById('gate-input');
-            const err   = document.getElementById('gate-error');
-            const val   = input.value.trim();
-            if (!val) {
-                err.style.display = 'block';
-                input.focus();
-                return;
-            }
-            err.style.display = 'none';
-
-            // If enumerator ID changed, upload any pending data, then wipe and start fresh
-            const prevId = _enumeratorId;
-            if (prevId && prevId !== val) {
-                // Flush any unsaved responses to backend under the OLD ID before wiping
+            if (_enumeratorId && _enumeratorId !== val) {
+                // Enumerator changed — flush completed responses to backend under OLD ID,
+                // then wipe local data so the new enumerator starts a clean session
                 try {
                     await flushToDB();
                     const store = loadStore();
-                    const respondents = store.respondents || {};
-                    const toUpload = Object.entries(respondents).filter(([, r]) => r.completed);
-                    for (const [id, r] of toUpload) {
-                        await autoUploadOne(id, r);
-                    }
-                } catch(e) { /* best-effort — carry on */ }
-
-                // Save new ID to IDB metadata (survives clearAppStorage)
+                    const toUpload = Object.entries(store.respondents || {}).filter(([, r]) => r.completed);
+                    for (const [id, r] of toUpload) await autoUploadOne(id, r);
+                } catch(e) { /* best-effort */ }
                 await saveEnumeratorId(val);
                 clearAppStorage();
                 setTimeout(() => window.location.reload(), 300);
                 return;
             }
-
             await saveEnumeratorId(val);
-            document.getElementById('gate-overlay').classList.remove('show');
-            const nameEl = document.getElementById('eb-name-display');
-            if (nameEl) nameEl.textContent = val;
         }
 
         /* ════════════════════════════════════════════════════
@@ -1336,6 +1175,9 @@
             if (fGen)  fGen.value  = '';
             if (fEdu)  fEdu.value  = '';
             if (fName) fName.value = '';
+            // Keep enumerator field pre-filled — same person collects multiple respondents
+            const fEnum = document.getElementById('profile-enumerator');
+            if (fEnum && !fEnum.value.trim()) fEnum.value = _enumeratorId || '';
             document.querySelectorAll('textarea').forEach(t => t.value = '');
             document.querySelectorAll('input[type="radio"]').forEach(r => r.checked = false);
             document.querySelectorAll('.validation-error').forEach(e => e.classList.remove('show'));
@@ -1828,18 +1670,6 @@
         }
 
         /* ════════════════════════════════════════════════════
-           ENUMERATOR BAR  (rendered inside survey)
-        ════════════════════════════════════════════════════ */
-        function buildEnumeratorBar() {
-            return `
-                <div class="enumerator-bar">
-                    <label>Enumerator:</label>
-                    <span id="eb-name-display" class="eb-val">${_enumeratorId || '—'}</span>
-                    <button class="eb-save-btn" onclick="showEnumeratorGate()">Change</button>
-                </div>
-            `;
-        }
-
         /* ════════════════════════════════════════════════════
            DOWNLOAD HELPERS
         ════════════════════════════════════════════════════ */
@@ -1913,10 +1743,6 @@
 
             renderSurvey(_memStore);
 
-            if (!_enumeratorId) {
-                setTimeout(showEnumeratorGate, 300);
-            }
-
             loadSheetJS();
         }
 
@@ -1965,12 +1791,15 @@
                 html += `</div>`;
             }
 
-            html += buildEnumeratorBar();
             html += buildRespondentManager(store);
 
             html += `
                 <div class="profile-card">
                     <h2>Respondent Information</h2>
+                    <div class="profile-group">
+                        <label class="profile-label" for="profile-enumerator">Enumerator Name / Code <span style="color:#dc3545">*</span></label>
+                        <input type="text" id="profile-enumerator" placeholder="Enter your name or code (e.g. ENUM-001)" autocomplete="off" value="${_enumeratorId ? _enumeratorId.replace(/"/g,'&quot;') : ''}">
+                    </div>
                     <div class="profile-group">
                         <label class="profile-label" for="profile-name">Respondent Name (Optional)</label>
                         <input type="text" id="profile-name" placeholder="Enter respondent name">
@@ -2086,6 +1915,18 @@
            EVENT LISTENERS  (unchanged)
         ════════════════════════════════════════════════════ */
         function attachEventListeners() {
+            // Enumerator input — saved on blur, triggers session reset on change
+            const enumInput = document.getElementById('profile-enumerator');
+            if (enumInput) {
+                enumInput.addEventListener('blur', function() {
+                    onEnumeratorInputChange(this.value);
+                });
+                // Highlight border while empty
+                enumInput.addEventListener('input', function() {
+                    this.style.borderColor = this.value.trim() ? '' : '#dc3545';
+                });
+            }
+
             const profileFields = [
                 { id: 'profile-name',      key: 'name'      },
                 { id: 'profile-age',       key: 'age'       },
@@ -2134,9 +1975,21 @@
            SUBMIT  (performance: no full re-render)
         ════════════════════════════════════════════════════ */
         function submitSurvey() {
-            if (!_enumeratorId) {
-                showEnumeratorGate();
+            // Read enumerator from inline input and validate
+            const enumInput = document.getElementById('profile-enumerator');
+            const enumVal   = enumInput ? enumInput.value.trim() : _enumeratorId;
+            if (!enumVal) {
+                if (enumInput) {
+                    enumInput.style.borderColor = '#dc3545';
+                    enumInput.focus();
+                    enumInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
                 return;
+            }
+            if (enumVal !== _enumeratorId) {
+                // Update in-memory without triggering session wipe (same submit action)
+                _enumeratorId = enumVal;
+                saveEnumeratorId(enumVal);
             }
 
             let isValid = true;
